@@ -1,0 +1,3167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Zola App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;700&family=Syne:wght@700;800&family=Cinzel:wght@400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;background:#07091A;}
+:root{
+  --sp:#7B4FD4;--sp2:#A78BFA;--sp-pale:rgba(123,79,212,0.12);--sp-glow:rgba(123,79,212,0.32);
+  --au:#C49820;--au2:#E8B830;--em:#15A854;--em-pale:rgba(21,168,84,0.10);--em-glow:rgba(21,168,84,0.28);
+  --ro:#E8547A;--ro-pale:rgba(232,84,122,0.10);--vi:#7C3AED;--vi2:#9D60FF;--vi-pale:rgba(124,58,237,0.10);--vi-glow:rgba(124,58,237,0.30);
+  --sa:#1A6FC4;--sa2:#3B8EE8;--tc:#0D9B8A;--tc2:#14C4AF;--am:#E65C00;--am2:#FF8C00;
+  --t1:#1A1E2E;--t2:#3D4460;--t3:#7A82A8;--t4:#C0C8E8;--card:#FFFFFF;--sh:0 2px 16px rgba(0,0,0,0.07);
+}
+
+body{background:#07091A;}
+#app{position:relative;width:100%;max-width:430px;height:100%;margin:0 auto;background:radial-gradient(ellipse at 50% 0%,rgba(100,60,200,0.48) 0%,transparent 58%),radial-gradient(ellipse at 12% 82%,rgba(196,120,32,0.20) 0%,transparent 45%),linear-gradient(165deg,#07091A 0%,#0D1B3E 42%,#13113A 72%,#0A1628 100%);display:flex;flex-direction:column;overflow:hidden;}
+
+/* STARS */
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle linear infinite;}
+@keyframes twinkle{0%,100%{opacity:0.12;transform:scale(1);}50%{opacity:0.88;transform:scale(1.6);}}
+
+/* STATUS BAR */
+#sbar{flex-shrink:0;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid rgba(255,255,255,0.06);z-index:10;background:rgba(7,9,26,0.92);backdrop-filter:blur(12px);}
+.sbar-time{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:rgba(255,255,255,0.88);}
+.sbar-right{display:flex;align-items:center;gap:8px;}
+.sbar-btn{padding:4px 12px;border-radius:100px;border:1px solid rgba(123,79,212,0.30);background:rgba(123,79,212,0.12);font-size:10px;font-weight:700;color:var(--sp2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.sbar-btn:active{transform:scale(0.92);}
+
+/* ACTION BAR */
+#action-bar{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:5px 12px;background:rgba(7,9,26,0.88);border-bottom:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(8px);}
+.ab-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.28);margin-right:auto;}
+.ab-btn{display:flex;align-items:center;gap:3px;padding:4px 11px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.05);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,0.62);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.ab-btn:active{transform:scale(0.90);}
+.ab-btn:hover{border-color:var(--sp2);color:var(--sp2);}
+
+/* SCREEN SWITCHER */
+#screen-nav{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(7,9,26,0.85);border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(8px);}
+.screen-tab{flex:1;padding:10px;border-radius:12px;text-align:center;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,0.38);cursor:pointer;transition:all 0.3s;border:1px solid rgba(255,255,255,0.08);}
+.screen-tab.active{background:linear-gradient(135deg,var(--sp),var(--sp2));color:#fff;border-color:var(--sp2);}
+
+/* MAIN CONTENT AREA */
+#main{flex:1;min-height:0;position:relative;overflow:hidden;z-index:1;}
+.screen{position:absolute;inset:0;display:none;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:20px;}
+.screen::-webkit-scrollbar{display:none;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* SCREEN 1: SPIRIT CENTRE                                                    */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#screen-spirit{background:radial-gradient(ellipse at 50% 0%,rgba(100,60,200,0.48) 0%,transparent 58%),radial-gradient(ellipse at 12% 82%,rgba(196,120,32,0.20) 0%,transparent 45%),linear-gradient(165deg,#07091A 0%,#0D1B3E 42%,#13113A 72%,#0A1628 100%);}
+#spirit-main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:20px;position:relative;z-index:1;}
+#spirit-main::-webkit-scrollbar{display:none;}
+
+.sp-hdr{padding:18px 16px 8px;display:flex;align-items:flex-start;justify-content:space-between;}
+.sp-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#E8E4FF;line-height:1.1;}
+.sp-sub{font-size:10px;color:rgba(200,190,255,0.42);margin-top:3px;font-weight:500;}
+.candle-btn{padding:7px 14px;border-radius:100px;border:1px solid rgba(123,79,212,0.30);background:rgba(123,79,212,0.12);font-size:11px;font-weight:700;color:var(--sp2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1);}
+.candle-btn:active{transform:scale(0.92);}
+.candle-btn.lit{background:rgba(255,200,80,0.14);border-color:rgba(255,200,80,0.35);color:rgba(255,220,100,0.88);}
+
+/* CANDLE OVERLAY */
+#candle-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);align-items:center;justify-content:center;flex-direction:column;gap:20px;}
+#candle-overlay.open{display:flex;}
+.candle-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.candle-flame{width:28px;height:50px;position:relative;margin-bottom:-4px;}
+.flame-outer{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:28px;height:50px;background:radial-gradient(ellipse at 50% 80%,#FF8C00,#FFD700 40%,rgba(255,220,100,0) 80%);border-radius:50% 50% 40% 40%;animation:flicker 1.5s ease-in-out infinite alternate;filter:blur(1px);}
+.flame-inner{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:14px;height:28px;background:radial-gradient(ellipse at 50% 80%,#fff,#FFE566 40%,rgba(255,200,80,0) 80%);border-radius:50% 50% 35% 35%;animation:flicker 0.9s ease-in-out infinite alternate-reverse;}
+@keyframes flicker{0%{transform:translateX(-50%) scaleX(1);}100%{transform:translateX(-50%) scaleX(0.88) rotate(2deg);}}
+.candle-body{width:20px;height:70px;background:linear-gradient(90deg,#f5f0e8,#fff9f0 40%,#ede5d0);border-radius:3px 3px 2px 2px;box-shadow:0 2px 14px rgba(255,200,80,0.35);}
+.candle-base{width:30px;height:8px;background:linear-gradient(90deg,#d4c8b0,#ede5d0);border-radius:0 0 4px 4px;}
+.candle-glow{position:absolute;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(255,200,80,0.35),transparent 70%);top:-20px;left:50%;transform:translateX(-50%);}
+.candle-verse{max-width:280px;text-align:center;}
+.candle-verse-text{font-family:'Cinzel',serif;font-size:13px;color:rgba(240,236,255,0.88);line-height:1.8;font-style:italic;}
+.candle-verse-ref{font-family:'DM Mono',monospace;font-size:10px;color:var(--sp2);margin-top:8px;}
+.candle-close{padding:10px 28px;border-radius:100px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);cursor:pointer;}
+.candle-close:active{transform:scale(0.95);}
+
+/* VERSE CARD */
+.sp-verse-card{margin:4px 14px 10px;border-radius:22px;background:linear-gradient(145deg,rgba(255,255,255,0.055),rgba(255,255,255,0.02));border:1px solid rgba(123,79,212,0.30);padding:18px 16px;position:relative;overflow:hidden;}
+.sp-verse-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 78% 18%,rgba(123,79,212,0.20),transparent 60%);}
+.sp-verse-text{font-family:'Cinzel',serif;font-size:14px;color:rgba(240,236,255,0.92);line-height:1.80;position:relative;z-index:1;font-style:italic;}
+.sp-verse-ref{font-family:'DM Mono',monospace;font-size:10px;color:var(--sp2);margin-top:10px;position:relative;z-index:1;}
+.sp-verse-btns{margin-top:11px;position:relative;z-index:1;display:flex;gap:7px;flex-wrap:wrap;}
+.sp-vbtn{padding:6px 14px;border-radius:100px;border:1px solid rgba(123,79,212,0.30);background:rgba(123,79,212,0.12);font-size:10px;font-weight:700;color:var(--sp2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.sp-vbtn:active{transform:scale(0.90);}
+.sp-vbtn-fav{border-color:rgba(232,84,122,0.30);background:rgba(232,84,122,0.10);color:#FF7A9A;}
+.sp-vbtn-fav.active{background:rgba(232,84,122,0.25);}
+
+/* SECTIONS */
+.sp-sec{margin:0 14px 10px;position:relative;z-index:1;}
+.sp-sec-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(200,190,255,0.38);margin-bottom:7px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+.sp-sec-lbl-line{flex:1;height:1px;background:rgba(255,255,255,0.06);}
+.sp-sec-lbl .sp-chev{font-size:9px;color:rgba(200,190,255,0.38);transition:transform 0.28s cubic-bezier(0.34,1.2,0.64,1);flex-shrink:0;display:inline-block;}
+.sp-sec.collapsed .sp-chev{transform:rotate(-90deg);}
+.sp-sec-body{overflow:hidden;max-height:1000px;transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.28s ease,transform 0.28s ease;opacity:1;transform:translateY(0);}
+.sp-sec.collapsed .sp-sec-body{max-height:0!important;opacity:0;transform:translateY(-4px);}
+
+/* PRAYER LIST */
+.sp-prayer-item{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:15px;background:rgba(255,255,255,0.04);border:1px solid rgba(123,79,212,0.16);cursor:pointer;transition:all 0.22s;margin-bottom:6px;}
+.sp-prayer-item.prayed{background:rgba(123,79,212,0.13);border-color:rgba(123,79,212,0.32);}
+.sp-p-chk{width:22px;height:22px;border-radius:7px;border:2px solid rgba(123,79,212,0.42);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1);color:#fff;}
+.sp-prayer-item.prayed .sp-p-chk{background:var(--sp);border-color:var(--sp);}
+.sp-prayer-item.prayed .sp-p-chk::after{content:'✓';}
+.sp-p-text{font-size:12.5px;font-weight:600;color:rgba(230,225,255,0.82);flex:1;line-height:1.3;}
+.sp-prayer-item.prayed .sp-p-text{color:rgba(160,150,200,0.55);text-decoration:line-through;}
+.sp-add-prayer-btn{width:100%;padding:10px;border:1.5px dashed rgba(123,79,212,0.22);border-radius:14px;background:none;font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(200,190,255,0.38);cursor:pointer;margin-top:5px;transition:all 0.2s;}
+.sp-add-prayer-btn:hover{border-color:var(--sp2);color:var(--sp2);}
+
+/* DECLARATIONS */
+.sp-declaration-entry{display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:16px;background:linear-gradient(145deg,rgba(123,79,212,0.10),rgba(100,60,200,0.06));border:1px solid rgba(123,79,212,0.22);cursor:pointer;transition:all 0.22s;margin-bottom:8px;position:relative;overflow:hidden;}
+.sp-declaration-entry::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 100% 0%,rgba(123,79,212,0.12),transparent 70%);}
+.sp-decl-avatar{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,rgba(255,220,100,0.30),rgba(123,79,212,0.25));border:1.5px solid rgba(123,79,212,0.25);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;position:relative;z-index:1;}
+.sp-decl-content{flex:1;position:relative;z-index:1;}
+.sp-decl-date{font-family:'DM Mono',monospace;font-size:10px;color:rgba(200,190,255,0.45);margin-bottom:4px;font-weight:600;}
+.sp-decl-text{font-family:'Cinzel',serif;font-size:14px;color:rgba(240,236,255,0.90);line-height:1.6;font-style:italic;}
+.sp-declaration-entry:hover{background:linear-gradient(145deg,rgba(123,79,212,0.15),rgba(100,60,200,0.10));border-color:rgba(123,79,212,0.35);}
+.sp-decl-del{display:none;position:absolute;right:12px;top:12px;width:24px;height:24px;border-radius:50%;background:rgba(232,84,122,0.15);border:1px solid rgba(232,84,122,0.30);color:#FF7A9A;cursor:pointer;font-size:14px;transition:all 0.2s;z-index:2;align-items:center;justify-content:center;font-weight:bold;}
+.sp-declaration-entry:hover .sp-decl-del{display:flex;}
+.sp-decl-del:hover{background:rgba(232,84,122,0.25);border-color:rgba(232,84,122,0.50);}
+
+/* AUDIO CARD */
+.sp-audio-card{margin:4px 14px 10px;border-radius:22px;background:linear-gradient(145deg,rgba(255,255,255,0.055),rgba(255,255,255,0.02));border:1px solid rgba(196,152,32,0.35);padding:16px 16px 14px;position:relative;overflow:hidden;}
+.sp-audio-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(196,152,32,0.15),transparent 60%);}
+.sp-audio-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(200,190,255,0.42);position:relative;z-index:1;margin-bottom:6px;}
+.sp-audio-title{font-family:'Cinzel',serif;font-size:13px;color:rgba(240,236,255,0.90);line-height:1.5;position:relative;z-index:1;margin-bottom:12px;}
+.sp-audio-title span{color:var(--au2);font-style:italic;}
+.sp-audio-controls{display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
+.sp-audio-play{width:40px;height:40px;border-radius:50%;border:none;flex-shrink:0;background:linear-gradient(135deg,var(--au),var(--au2));display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(196,152,32,0.40);transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);}
+.sp-audio-play:active{transform:scale(0.90);}
+.sp-audio-play svg{width:16px;height:16px;fill:#fff;margin-left:2px;}
+.sp-audio-play.playing svg{margin-left:0;}
+.sp-audio-right{flex:1;display:flex;flex-direction:column;gap:6px;}
+.sp-audio-seek{width:100%;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,0.10);outline:none;cursor:pointer;}
+.sp-audio-seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--au2);cursor:pointer;box-shadow:0 0 6px rgba(196,152,32,0.55);}
+.sp-audio-seek::-moz-range-thumb{width:14px;height:14px;border:none;border-radius:50%;background:var(--au2);cursor:pointer;}
+.sp-audio-time-row{display:flex;justify-content:space-between;}
+.sp-audio-time{font-family:'DM Mono',monospace;font-size:9px;color:rgba(200,190,255,0.38);}
+.sp-audio-playlist{margin-top:12px;display:flex;flex-direction:column;gap:5px;position:relative;z-index:1;}
+.sp-audio-track{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:13px;background:rgba(255,255,255,0.03);border:1px solid rgba(196,152,32,0.14);cursor:pointer;transition:all 0.2s;}
+.sp-audio-track:active{transform:scale(0.97);}
+.sp-audio-track.active{background:rgba(196,152,32,0.12);border-color:rgba(196,152,32,0.35);}
+.sp-audio-track-ico{font-size:9px;color:rgba(200,190,255,0.28);flex-shrink:0;width:12px;transition:color 0.2s;}
+.sp-audio-track.active .sp-audio-track-ico{color:var(--au2);}
+.sp-audio-track-info{flex:1;}
+.sp-audio-track-name{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:rgba(220,215,255,0.72);transition:color 0.2s;}
+.sp-audio-track.active .sp-audio-track-name{color:rgba(240,236,255,0.92);}
+.sp-audio-track-sub{font-family:'DM Mono',monospace;font-size:8.5px;color:rgba(200,190,255,0.32);margin-top:2px;}
+
+/* READING PLAN */
+.rp-card{background:rgba(255,255,255,0.04);border:1px solid rgba(123,79,212,0.20);border-radius:18px;padding:14px;}
+.rp-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--sp),var(--sp2));transition:width 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+.rp-dots{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:11px;}
+.rp-dot{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(123,79,212,0.22);display:flex;align-items:center;justify-content:center;font-size:8.5px;font-family:'DM Mono',monospace;font-weight:700;color:rgba(200,190,255,0.38);cursor:pointer;background:rgba(255,255,255,0.03);transition:all 0.2s;}
+.rp-dot.done{background:var(--sp);border-color:var(--sp);color:#fff;font-size:10px;}
+.rp-dot.today{border-color:var(--sp2);background:rgba(123,79,212,0.24);color:var(--sp2);}
+.rp-mark-btn{width:100%;padding:10px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--sp),var(--sp2));color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px var(--sp-glow);transition:transform 0.15s,box-shadow 0.15s;}
+.rp-mark-btn:active{transform:scale(0.96);}
+
+/* GRATITUDE JOURNAL */
+.sp-grat-card{margin:0 14px 10px;border-radius:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(123,79,212,0.18);overflow:hidden;}
+.sp-grat-ta{width:100%;padding:10px 14px;border:none;outline:none;resize:none;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(230,225,255,0.75);background:transparent;min-height:88px;line-height:1.65;}
+.sp-grat-ta::placeholder{color:rgba(200,190,255,0.22);font-style:italic;}
+.sp-grat-save{padding:8px 18px;border:none;border-radius:11px;background:linear-gradient(135deg,var(--sp),var(--sp2));color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 3px 14px var(--sp-glow);}
+.sp-grat-save:active{transform:scale(0.95);}
+.sp-grat-entry{padding:10px 13px;border-radius:14px;background:rgba(123,79,212,0.07);border:1px solid rgba(123,79,212,0.14);margin-bottom:6px;}
+.sp-grat-entry-text{font-size:12px;color:rgba(220,215,255,0.72);line-height:1.6;}
+
+/* MODALS */
+#add-prayer-modal,#add-verse-modal,#add-routine-modal,#add-supplement-modal,#add-workout-modal,#add-shopping-modal,#add-meal-modal,#add-recipe-modal,#export-sheet,#candle-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.60);backdrop-filter:blur(8px);align-items:flex-end;}
+#add-prayer-modal.open,#add-verse-modal.open,#add-routine-modal.open,#add-supplement-modal.open,#add-workout-modal.open,#add-shopping-modal.open,#add-meal-modal.open,#add-recipe-modal.open,#export-sheet.open{display:flex;}
+.ap-sheet{background:linear-gradient(180deg,#1A1040,#120D30);border:1px solid rgba(123,79,212,0.28);border-radius:26px 26px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom,20px)+20px);width:100%;max-width:430px;margin:0 auto;box-shadow:0 -14px 50px rgba(0,0,0,0.5);}
+.ap-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:rgba(230,225,255,0.90);margin-bottom:13px;}
+.ap-inp{width:100%;padding:12px 14px;border:1.5px solid rgba(123,79,212,0.28);border-radius:14px;background:rgba(123,79,212,0.08);color:rgba(230,225,255,0.88);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
+.ap-inp:focus{border-color:var(--sp2);box-shadow:0 0 0 3px var(--sp-pale);}
+.ap-btns{display:flex;gap:8px;margin-top:12px;}
+.ap-save{flex:2;padding:12px;border:none;border-radius:13px;background:linear-gradient(135deg,var(--sp),var(--sp2));font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 4px 16px var(--sp-glow);}
+.es-body{background:linear-gradient(180deg,#1A1040,#120D30);border:1px solid rgba(123,79,212,0.28);border-radius:26px 26px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom,20px)+20px);width:100%;max-width:430px;margin:0 auto;box-shadow:0 -14px 50px rgba(0,0,0,0.5);}
+.es-btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.es-btn{padding:14px 10px;border-radius:16px;border:1.5px solid rgba(123,79,212,0.24);background:rgba(123,79,212,0.09);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--sp2);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all 0.2s;}
+.es-btn:active{transform:scale(0.94);}
+
+/* TOAST */
+#toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+24px);left:50%;transform:translateX(-50%) translateY(100px) scale(0.94);background:rgba(20,14,50,0.97);border:1px solid rgba(123,79,212,0.28);border-radius:100px;padding:11px 22px;font-family:'DM Sans',sans-serif;font-size:12.5px;color:rgba(240,235,255,0.94);white-space:nowrap;box-shadow:0 8px 40px rgba(0,0,0,0.55),0 0 0 1px rgba(123,79,212,0.12);z-index:99999;transition:transform 0.40s cubic-bezier(0.34,1.56,0.64,1),opacity 0.38s ease;pointer-events:none;opacity:0;}
+#toast.show{transform:translateX(-50%) translateY(0) scale(1);opacity:1;pointer-events:auto;cursor:pointer;}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* SCREEN 2: WELLNESS                                                         */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#screen-wellness{background:linear-gradient(135deg,rgba(21,168,84,0.12) 0%,rgba(124,58,237,0.08) 50%,rgba(26,111,196,0.10) 100%),#0A0C10;}
+
+/* WELLNESS HEADER */
+.hiw-brand{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 4px;}
+.hiw-logo{display:flex;align-items:center;gap:8px;}
+.hiw-gem{width:33px;height:33px;border-radius:11px;background:linear-gradient(135deg,var(--em2),var(--em));display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 14px var(--em-glow);animation:gemPulse 3s ease-in-out infinite;}
+@keyframes gemPulse{0%,100%{box-shadow:0 4px 14px var(--em-glow);}50%{box-shadow:0 4px 14px var(--em-glow),0 0 0 5px rgba(21,168,84,0.07);}}
+.hiw-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:rgba(220,230,255,0.92);}
+.hiw-sub{font-size:9px;color:rgba(200,190,255,0.45);}
+.hiw-wallet{background:linear-gradient(135deg,rgba(255,248,200,0.96),rgba(255,255,255,0.88));border:1.5px solid rgba(196,152,32,0.26);border-radius:100px;padding:5px 11px 5px 8px;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(196,152,32,0.20);}
+.hiw-coin{font-size:19px;animation:coinSpin 5s linear infinite;}
+@keyframes coinSpin{0%,70%,100%{transform:rotateY(0);}40%{transform:rotateY(180deg) scaleX(-1);}}
+.hiw-coin-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--au);}
+
+/* WELLNESS TABS */
+.tab-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(255,255,255,0.08);border-radius:16px;margin:10px 14px;cursor:pointer;user-select:none;border:1.5px solid rgba(255,255,255,0.10);}
+.tab-header.active{background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(157,96,255,0.10));border-color:rgba(124,58,237,0.25);}
+.tab-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;letter-spacing:0.08em;color:rgba(220,230,255,0.92);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.tab-chev{font-size:12px;color:rgba(200,190,255,0.45);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);}
+.tab-header.collapsed .tab-chev{transform:rotate(-90deg);}
+.tab-content{max-height:none;opacity:1;overflow:hidden;transition:max-height 0.3s cubic-bezier(0.4,0,0.2,1),opacity 0.25s;}
+.tab-content.collapsed{max-height:0!important;opacity:0;pointer-events:none;}
+
+/* JOY CARDS */
+.res-card{margin:6px 14px 0;background:rgba(255,255,255,0.85);border-radius:18px;padding:12px 14px;box-shadow:var(--sh);border:1px solid rgba(0,0,0,0.06);}
+.res-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--t1);}
+.res-pct{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--em);}
+.res-bar{height:9px;background:rgba(0,0,0,0.06);border-radius:5px;overflow:hidden;position:relative;margin-bottom:9px;}
+.res-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--em),var(--em2),#2ECC71);box-shadow:0 0 12px var(--em-glow);transition:width 0.6s;}
+.h-full{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;background:linear-gradient(135deg,rgba(255,182,193,0.75),rgba(255,255,255,0.88));border:1.5px solid rgba(232,84,122,0.30);animation:heartBeat 1.5s ease-in-out infinite;}
+@keyframes heartBeat{0%,100%{transform:scale(1);}14%{transform:scale(1.22);}28%{transform:scale(1);}42%{transform:scale(1.14);}}
+.h-empty{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;background:rgba(0,0,0,0.05);border:1.5px solid rgba(0,0,0,0.09);opacity:0.4;}
+.therm-card{background:#fff;border-radius:20px;margin:8px 14px 0;padding:14px;box-shadow:var(--sh);border:1px solid rgba(232,168,156,0.18);}
+.therm-score-num{font-family:'Fredoka One',cursive;font-size:42px;line-height:1;color:var(--au2);transition:color 0.5s;}
+.je-card{background:var(--card);border-radius:20px;margin:8px 14px 10px;box-shadow:var(--sh);border:1px solid rgba(0,0,0,0.06);overflow:hidden;}
+.je-ta{width:100%;padding:8px 13px;border:none;outline:none;resize:none;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--t1);background:transparent;min-height:75px;line-height:1.6;}
+.je-ta::placeholder{color:var(--t4);font-style:italic;}
+.je-save{background:linear-gradient(135deg,var(--em),var(--em2));color:#fff;border:none;border-radius:9px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.je-entry{margin:0 14px 6px;padding:10px 12px;background:rgba(255,255,255,0.6);border-radius:14px;border:1px solid rgba(0,0,0,0.06);}
+
+/* THERAPY SECTION */
+.th-music-hero{background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(157,96,255,0.10));border:1.5px solid rgba(124,58,237,0.22);border-radius:16px;padding:16px;margin:0 14px 12px;}
+.th-freq-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--vi);margin-bottom:6px;}
+.th-controls{display:flex;align-items:center;justify-content:center;gap:12px;}
+.th-ctrl-btn{width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.th-ctrl-btn.play{width:56px;height:56px;background:linear-gradient(135deg,var(--vi),var(--vi2));font-size:24px;}
+.th-ctrl-btn:active{transform:scale(0.90);}
+.th-sounds-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 14px 12px;}
+.th-sound-card{background:rgba(255,255,255,0.8);border-radius:14px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s;border:1.5px solid rgba(124,58,237,0.1);}
+.th-sound-card:active{transform:scale(0.95);}
+.th-sound-icon{font-size:28px;margin-bottom:6px;display:block;}
+.th-sound-name{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px;}
+
+/* HEALTH PROTOCOL */
+.hp-hero{margin:12px 14px 0;background:linear-gradient(135deg,#0a1a2a 0%,#0a120a 60%,#0d0a1a 100%);border:1px solid rgba(255,255,255,0.07);border-radius:18px;padding:18px;position:relative;overflow:hidden;}
+.hp-chip-val{font-family:'DM Mono',monospace;font-size:15px;font-weight:700;color:#00e676;line-height:1;}
+.hp-sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 14px 8px;}
+.hp-sec-chev{font-size:11px;color:#3a5244;margin-left:6px;transition:transform 0.25s cubic-bezier(.4,0,.2,1);flex-shrink:0;}
+.hp-routine-item{display:flex;align-items:center;gap:11px;background:#111820;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px;cursor:pointer;transition:opacity 0.2s;position:relative;margin:0 14px 7px;}
+.hp-routine-item.done{opacity:0.5;}
+
+.card{background:var(--card);border-radius:20px;box-shadow:var(--sh);border:1px solid rgba(0,0,0,0.06);margin:0 14px 10px;padding:12px;}
+
+/* UTILITY */
+.habit-chip{display:flex;align-items:center;gap:4px;padding:6px 11px;border-radius:100px;background:rgba(0,0,0,0.04);border:1.5px solid rgba(0,0,0,0.09);cursor:pointer;transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1);font-size:11px;font-weight:600;color:var(--t2);}
+.habit-chip.done{background:var(--em-pale);border-color:rgba(21,168,84,0.28);color:var(--em);}
+.wellness-main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:20px;position:relative;z-index:1;}
+.wellness-main::-webkit-scrollbar{display:none;}
+</style>
+</head>
+<body>
+
+<!-- STAR FIELD -->
+<div id="stars"></div>
+
+<div id="app">
+  <!-- STATUS BAR -->
+  <div id="sbar">
+    <span class="sbar-time" id="sbar-time">9:41</span>
+    <div class="sbar-right">
+      <button class="sbar-btn" id="candle-trigger" onclick="openCandle()">🕯 Light Candle</button>
+    </div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div id="action-bar">
+    <span class="ab-lbl">ZOLA APP</span>
+    <button class="ab-btn" onclick="doScreenshot()">📸 Shot</button>
+    <button class="ab-btn" onclick="openExportSheet()">↑ Share</button>
+    <button class="ab-btn" onclick="doSave()">💾 Save</button>
+  </div>
+
+  <!-- SCREEN SWITCHER -->
+  <div id="screen-nav">
+    <div class="screen-tab active" onclick="switchScreen('spirit')">🙏 Spirit</div>
+    <div class="screen-tab" onclick="switchScreen('wellness')">💚 Wellness</div>
+    <div class="screen-tab" onclick="switchScreen('planner')">📅 Planner</div>
+  </div>
+
+  <!-- MAIN CONTENT AREA -->
+  <div id="main">
+    
+    <!-- ═══════════════════════════════════════════════════════════════ SPIRIT CENTRE ═══════════════════════════════════════════════════════════════ -->
+    <div id="screen-spirit" class="screen active">
+      <div id="spirit-main">
+        <!-- HEADER -->
+        <div class="sp-hdr">
+          <div>
+            <div class="sp-title">Spirit<br>Centre</div>
+            <div class="sp-sub">Faith · Prayer · Gratitude</div>
+          </div>
+        </div>
+
+        <!-- VERSE OF THE DAY -->
+        <div class="sp-sec">
+          <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>Verse of the Day<div class="sp-sec-lbl-line"></div></div>
+          <div class="sp-sec-body">
+            <div class="sp-verse-card" style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:flex-start;gap:10px;">
+                <input type="checkbox" id="verse-done" style="width:20px;height:20px;cursor:pointer;margin-top:2px;flex-shrink:0;accent-color:var(--sp);" onchange="toggleVerseRead()">
+                <div style="flex:1;">
+                  <div class="sp-verse-text" id="sp-verse-text">\"I can do all things through Christ which strengtheneth me.\"</div>
+                  <div class="sp-verse-ref" id="sp-verse-ref">— Philippians 4:13</div>
+                </div>
+              </div>
+              <div class="sp-verse-btns">
+                <button class="sp-vbtn" onclick="nextVerse()">Next ›</button>
+                <button class="sp-vbtn" onclick="prevVerse()">‹ Prev</button>
+                <button class="sp-vbtn sp-vbtn-fav" id="fav-btn" onclick="toggleFav()">♡ Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DECLARATIONS OF THE DAY -->
+        <div class="sp-sec">
+          <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>Declarations of the Day<div class="sp-sec-lbl-line"></div></div>
+          <div class="sp-sec-body">
+            <!-- Declaration Input Card -->
+            <div style="background:linear-gradient(145deg,rgba(100,80,180,0.12),rgba(80,60,150,0.08));border:1.5px solid rgba(123,79,212,0.25);border-radius:24px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden;">
+              <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(123,79,212,0.15),transparent 60%);pointer-events:none;"></div>
+              
+              <textarea id="declaration-input" placeholder="What are you declaring over your life today?... ✨" style="width:100%;border:none;background:transparent;font-family:'Cinzel',serif;font-size:16px;color:rgba(240,236,255,0.88);outline:none;resize:none;min-height:40px;line-height:1.8;position:relative;z-index:1;" onkeyup="updateDeclarationCount()" onfocus="this.style.color='rgba(240,236,255,0.92)'"></textarea>
+              
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;position:relative;z-index:1;border-top:1px solid rgba(123,79,212,0.20);padding-top:14px;">
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(200,190,255,0.45);font-weight:600;letter-spacing:0.1em;">
+                  <span id="declaration-char-count">0</span> / 500
+                </div>
+                <button onclick="saveDeclaration()" style="padding:12px 28px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--sp),var(--sp2));color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 4px 16px rgba(123,79,212,0.30);">Save ✦</button>
+              </div>
+            </div>
+
+            <!-- Saved Declarations -->
+            <div id="sp-declarations-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+        </div>
+
+        <!-- SCRIPTURE AUDIO -->
+        <div class="sp-sec">
+          <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>Daily Audio<div class="sp-sec-lbl-line"></div></div>
+          <div class="sp-sec-body">
+            <div class="sp-audio-card">
+              <div class="sp-audio-title" id="audio-now-title">Today's Reading</div>
+              <div class="sp-audio-controls">
+                <button class="sp-audio-play" id="audio-play-btn" onclick="audioToggle()">
+                  <svg id="audio-play-icon" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </button>
+                <div class="sp-audio-right">
+                  <input class="sp-audio-seek" id="audio-seek" type="range" min="0" max="100" value="0" oninput="audioSeek(this.value)">
+                  <div class="sp-audio-time-row">
+                    <span class="sp-audio-time" id="audio-cur">0:00</span>
+                    <span class="sp-audio-time" id="audio-dur">--:--</span>
+                  </div>
+                </div>
+              </div>
+              <div class="sp-audio-playlist" id="sp-audio-playlist">
+                <div class="sp-audio-track active" id="track-0" onclick="audioLoad(0)">
+                  <span class="sp-audio-track-ico">▶</span>
+                  <div class="sp-audio-track-info">
+                    <div class="sp-audio-track-name">Josh 1:8 · 1 John 3:1</div>
+                    <div class="sp-audio-track-sub">Faith · Identity</div>
+                  </div>
+                </div>
+                <div class="sp-audio-track" id="track-1" onclick="audioLoad(1)">
+                  <span class="sp-audio-track-ico">▶</span>
+                  <div class="sp-audio-track-info">
+                    <div class="sp-audio-track-name">Isaiah 41:10</div>
+                    <div class="sp-audio-track-sub">Fear Not · Strength</div>
+                  </div>
+                </div>
+                <div class="sp-audio-track" id="track-2" onclick="audioLoad(2)">
+                  <span class="sp-audio-track-ico">▶</span>
+                  <div class="sp-audio-track-info">
+                    <div class="sp-audio-track-name">Jeremiah 31:3 · Lamentations 3:22-23</div>
+                    <div class="sp-audio-track-sub">Love · Compassion</div>
+                  </div>
+                </div>
+                <div class="sp-audio-track" id="track-3" onclick="audioLoad(3)">
+                  <span class="sp-audio-track-ico">▶</span>
+                  <div class="sp-audio-track-info">
+                    <div class="sp-audio-track-name">Psalm 91</div>
+                    <div class="sp-audio-track-sub">Protection · Trust</div>
+                  </div>
+                </div>
+                <div class="sp-audio-track" id="track-4" onclick="audioLoad(4)">
+                  <span class="sp-audio-track-ico">▶</span>
+                  <div class="sp-audio-track-info">
+                    <div class="sp-audio-track-name">Psalm 124</div>
+                    <div class="sp-audio-track-sub">Thanksgiving · Deliverance</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRAYER REQUESTS -->
+        <div class="sp-sec">
+          <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>Prayer Requests<div class="sp-sec-lbl-line"></div></div>
+          <div class="sp-sec-body">
+            <div id="sp-prayer-list"></div>
+            <button class="sp-add-prayer-btn" onclick="openAddPrayer()">+ Add Prayer</button>
+          </div>
+        </div>
+
+        <!-- READING PLAN -->
+        <div class="sp-sec">
+          <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>30-Day Scripture Plan<div class="sp-sec-lbl-line"></div></div>
+          <div class="sp-sec-body">
+            <div class="rp-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <span style="font-size:12.5px;font-weight:700;color:rgba(230,225,255,0.82);" id="rp-today-ref">Day 1 · Genesis 1-2</span>
+                <span style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(200,190,255,0.38);" id="rp-pct">0% complete</span>
+              </div>
+              <div style="height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-bottom:11px;">
+                <div class="rp-bar-fill" id="rp-bar" style="width:0%;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--sp),var(--sp2));transition:width 0.5s cubic-bezier(0.34,1.56,0.64,1);"></div>
+              </div>
+              <div class="rp-dots" id="rp-days"></div>
+              <button class="rp-mark-btn" onclick="markReadingDay()">Mark Today Read ✝</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GRATITUDE JOURNAL -->
+        <div class="sp-sec">
+          <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>Gratitude Journal<div class="sp-sec-lbl-line"></div></div>
+          <div class="sp-sec-body">
+            <div class="sp-grat-card">
+              <textarea class="sp-grat-ta" id="sp-grat-ta" placeholder="What are you grateful for today?…✨" oninput="gratCount()"></textarea>
+              <div style="padding:8px 14px;border-top:1px solid rgba(123,79,212,0.10);display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:9px;color:rgba(200,190,255,0.30);" id="grat-count">0 / 500</span>
+                <button class="sp-grat-save" onclick="spGratSave()">Save ✦</button>
+              </div>
+            </div>
+            <div id="sp-grat-entries"></div>
+          </div>
+        </div>
+
+        <!-- FAVOURITE VERSES -->
+        <div class="sp-sec">
+          <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>Favourite Verses<div class="sp-sec-lbl-line"></div></div>
+          <div class="sp-sec-body">
+            <div id="fav-list"></div>
+            <button class="sp-add-prayer-btn" onclick="openAddVerse()">+ Add Verse</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════ WELLNESS ═══════════════════════════════════════════════════════════════ -->
+    <div id="screen-wellness" class="screen">
+      <div class="wellness-main">
+        <!-- WELLNESS HEADER -->
+        <div class="hiw-brand">
+          <div class="hiw-logo">
+            <div class="hiw-gem">💎</div>
+            <div>
+              <div class="hiw-name">Wellness</div>
+              <div class="hiw-sub">Health · Joy · Growth</div>
+            </div>
+          </div>
+          <div class="hiw-wallet">
+            <span class="hiw-coin">💰</span>
+            <span class="hiw-coin-val" id="coin-count">2450</span>
+          </div>
+        </div>
+
+        <!-- JOY TAB -->
+        <div class="tab-header active" onclick="toggleTab(this)">
+          <span class="tab-title">😊 Joy</span>
+          <span class="tab-chev">▾</span>
+        </div>
+        <div class="tab-content">
+          <div class="res-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div class="res-title">Today's Vitality</div>
+              <div class="res-pct" id="joy-pct">45%</div>
+            </div>
+            <div class="res-bar"><div class="res-fill" id="joy-fill" style="width:45%"></div></div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div id="heart-1" class="h-full" style="cursor:pointer;transition:all 0.2s;" onclick="updateStreakByHearts(1);" onmouseover="this.style.transform='scale(1.15)';" onmouseout="this.style.transform='scale(1)';">❤️</div>
+              <div id="heart-2" class="h-full" style="cursor:pointer;transition:all 0.2s;" onclick="updateStreakByHearts(2);" onmouseover="this.style.transform='scale(1.15)';" onmouseout="this.style.transform='scale(1)';">❤️</div>
+              <div id="heart-3" class="h-full" style="cursor:pointer;transition:all 0.2s;" onclick="updateStreakByHearts(3);" onmouseover="this.style.transform='scale(1.15)';" onmouseout="this.style.transform='scale(1)';">❤️</div>
+              <div id="heart-4" class="h-empty" style="cursor:pointer;transition:all 0.2s;" onclick="updateStreakByHearts(4);" onmouseover="this.style.transform='scale(1.15)';" onmouseout="this.style.transform='scale(1)';">❤️</div>
+              <div id="heart-5" class="h-empty" style="cursor:pointer;transition:all 0.2s;" onclick="updateStreakByHearts(5);" onmouseover="this.style.transform='scale(1.15)';" onmouseout="this.style.transform='scale(1)';">❤️</div>
+              <span class="fire-badge">🔥 <span id="streak-display">3</span>-day streak</span>
+            </div>
+          </div>
+
+          <div class="therm-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div class="therm-title" style="font-size:13px;font-weight:700;color:var(--t1);">Mood Thermometer</div>
+              <div class="therm-date" style="background:var(--em-pale);border-radius:12px;padding:2px 9px;font-size:10px;font-weight:600;color:var(--t3);">Today</div>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:12px;">
+              <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+                <div style="display:flex;flex-direction:column;justify-content:space-between;height:100px;margin-left:4px;font-size:9.5px;color:var(--t3);">
+                  <div>😄</div><div>😊</div><div>😐</div><div>😟</div><div>😢</div>
+                </div>
+              </div>
+              <div style="flex:1;">
+                <div style="display:flex;align-items:baseline;gap:3px;margin-bottom:1px;">
+                  <div class="therm-score-num" style="font-family:'Fredoka One',cursive;font-size:42px;color:var(--au2);">72</div>
+                  <div style="font-size:11px;color:var(--t3);font-weight:600;">°</div>
+                </div>
+                <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px;">Happy & Energized</div>
+                <div style="font-size:11px;color:var(--t2);line-height:1.5;">You're feeling great today!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- THERAPY TAB -->
+        <div class="tab-header active" onclick="toggleTab(this)">
+          <span class="tab-title">🎵 Therapy</span>
+          <span class="tab-chev">▾</span>
+        </div>
+        <div class="tab-content">
+          <div class="th-music-hero">
+            <div class="th-freq-title">432 Hz Healing Frequency</div>
+            <div style="font-size:11px;color:rgba(200,190,255,0.6);display:flex;align-items:center;gap:4px;margin-bottom:12px;">🔊 Binaural beats & healing frequencies</div>
+            <div style="height:6px;background:rgba(124,58,237,0.15);border-radius:3px;margin-bottom:12px;overflow:hidden;">
+              <div id="th-progress-bar" style="height:100%;background:linear-gradient(90deg,var(--vi),var(--vi2));width:0%;transition:width 0.1s linear;"></div>
+            </div>
+            <div class="th-controls">
+              <button class="th-ctrl-btn play" id="th-play-btn" style="pointer-events:auto;position:relative;z-index:5;cursor:pointer;">▶</button>
+            </div>
+          </div>
+
+          <div style="padding:0 14px 12px;">
+            <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.12em;color:rgba(220,230,255,0.92);text-transform:uppercase;margin-bottom:8px;">🎼 Healing Frequencies</div>
+            <div class="th-sounds-grid">
+              <div class="track-btn active-track" onclick="selectTherapyTrack(0)" style="padding:8px 4px;border-radius:12px;border:2px solid rgba(139,92,246,0.35);background:rgba(139,92,246,0.12);text-align:center;cursor:pointer;transition:all 0.2s;pointer-events:auto;">
+                <div style="font-size:18px;">🎵</div><div style="font-size:9.5px;font-weight:700;color:#7c3aed;margin-top:2px;">432 Hz</div><div style="font-size:8px;color:#7a8fa8;">Deep calm</div></div>
+              <div class="track-btn" onclick="selectTherapyTrack(1)" style="padding:8px 4px;border-radius:12px;border:1.5px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.7);text-align:center;cursor:pointer;transition:all 0.2s;pointer-events:auto;">
+                <div style="font-size:18px;">🌊</div><div style="font-size:9.5px;font-weight:700;color:#6B7280;margin-top:2px;">40 Hz</div><div style="font-size:8px;color:#7a8fa8;">Stress relief</div></div>
+              <div class="track-btn" onclick="selectTherapyTrack(2)" style="padding:8px 4px;border-radius:12px;border:1.5px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.7);text-align:center;cursor:pointer;transition:all 0.2s;pointer-events:auto;">
+                <div style="font-size:18px;">🌧️</div><div style="font-size:9.5px;font-weight:700;color:#6B7280;margin-top:2px;">10 Hz</div><div style="font-size:8px;color:#7a8fa8;">Focus & sleep</div></div>
+              <div class="track-btn" onclick="selectTherapyTrack(3)" style="padding:8px 4px;border-radius:12px;border:1.5px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.7);text-align:center;cursor:pointer;transition:all 0.2s;pointer-events:auto;">
+                <div style="font-size:18px;">🔔</div><div style="font-size:9.5px;font-weight:700;color:#6B7280;margin-top:2px;">8 Hz</div><div style="font-size:8px;color:#7a8fa8;">Deep meditation</div></div>
+              <div class="track-btn" onclick="selectTherapyTrack(4)" style="padding:8px 4px;border-radius:12px;border:1.5px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.7);text-align:center;cursor:pointer;transition:all 0.2s;pointer-events:auto;">
+                <div style="font-size:18px;">🎻</div><div style="font-size:9.5px;font-weight:700;color:#6B7280;margin-top:2px;">528 Hz</div><div style="font-size:8px;color:#7a8fa8;">Mood elevation</div></div>
+              <div class="track-btn" onclick="selectTherapyTrack(5)" style="padding:8px 4px;border-radius:12px;border:1.5px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.7);text-align:center;cursor:pointer;transition:all 0.2s;pointer-events:auto;">
+                <div style="font-size:18px;">🥁</div><div style="font-size:9.5px;font-weight:700;color:#6B7280;margin-top:2px;">63 Hz</div><div style="font-size:8px;color:#7a8fa8;">Energy boost</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- JOURNAL TAB -->
+        <div class="tab-header active" onclick="toggleTab(this)">
+          <span class="tab-title">📔 Journal</span>
+          <span class="tab-chev">▾</span>
+        </div>
+        <div class="tab-content">
+          <div class="je-card">
+            <div style="padding:10px 13px 0;font-size:12.5px;font-weight:700;color:var(--t1);">Wellness Note</div>
+            <textarea class="je-ta" id="je-ta" placeholder="How are you feeling?…" oninput="jeCount()"></textarea>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-top:1px solid rgba(0,0,0,0.06);">
+              <span style="font-size:9px;color:var(--t3);font-family:'DM Mono',monospace;font-weight:600;" id="je-count">0 / 300</span>
+              <button class="je-save" onclick="jeSave()">Save</button>
+            </div>
+          </div>
+          <div id="je-entries"></div>
+        </div>
+
+        <!-- HEALTH PROTOCOL TAB -->
+        <div class="tab-header active" onclick="toggleTab(this)">
+          <span class="tab-title">⚡ Health</span>
+          <span class="tab-chev">▾</span>
+        </div>
+        <div class="tab-content">
+          <!-- FASTING TIMER HERO -->
+          <div class="hp-hero" style="margin:12px 14px 0;background:linear-gradient(135deg,#0a1a2a 0%,#0a120a 60%,#0d0a1a 100%);border:1px solid rgba(255,255,255,0.07);border-radius:18px;padding:18px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:#00e676;letter-spacing:0.2em;margin-bottom:8px;">⏱ FASTING WINDOW</div>
+            <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:700;color:#00e676;margin-bottom:12px;">16:00</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+              <div style="background:rgba(0,230,118,0.10);border:1px solid rgba(0,230,118,0.20);border-radius:10px;padding:8px;text-align:center;">
+                <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#00e676;">98.2</div>
+                <div style="font-size:8px;color:#5a8a72;margin-top:2px;">°F</div>
+              </div>
+              <div style="background:rgba(0,230,118,0.10);border:1px solid rgba(0,230,118,0.20);border-radius:10px;padding:8px;text-align:center;">
+                <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#00e676;">72</div>
+                <div style="font-size:8px;color:#5a8a72;margin-top:2px;">BPM</div>
+              </div>
+              <div style="background:rgba(0,230,118,0.10);border:1px solid rgba(0,230,118,0.20);border-radius:10px;padding:8px;text-align:center;">
+                <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#00e676;">8</div>
+                <div style="font-size:8px;color:#5a8a72;margin-top:2px;">hrs</div>
+              </div>
+              <div style="background:rgba(0,230,118,0.10);border:1px solid rgba(0,230,118,0.20);border-radius:10px;padding:8px;text-align:center;">
+                <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#00e676;">68%</div>
+                <div style="font-size:8px;color:#5a8a72;margin-top:2px;">Complete</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MORNING ROUTINE -->
+          <div class="sp-sec" style="margin:0 14px 10px;">
+            <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>💪 Daily Routines<div class="sp-sec-lbl-line"></div></div>
+            <div class="sp-sec-body">
+              <div id="hp-routines"></div>
+              <button style="width:100%;font-size:12px;font-weight:700;color:#00e676;background:rgba(0,230,118,0.15);border:2px solid rgba(0,230,118,0.35);border-radius:12px;padding:10px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;transition:all 0.2s;pointer-events:auto;position:relative;z-index:5;" onmouseover="this.style.background='rgba(0,230,118,0.25)'" onmouseout="this.style.background='rgba(0,230,118,0.15)'" onclick="openAddRoutine()">+ Add</button>
+            </div>
+          </div>
+
+          <!-- SUPPLEMENT STACK -->
+          <div class="sp-sec" style="margin:0 14px 10px;">
+            <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>💊 Supplements<div class="sp-sec-lbl-line"></div></div>
+            <div class="sp-sec-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;" id="hp-supp-grid"></div>
+              <button style="width:100%;font-size:10px;color:#00e676;background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.25);border-radius:20px;padding:8px 11px;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600;" onclick="openAddSupplement()">+ Add Supplement</button>
+            </div>
+          </div>
+
+          <!-- EXERCISE STACK -->
+          <div class="sp-sec" style="margin:0 14px 10px;">
+            <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>🏋️ Workouts<div class="sp-sec-lbl-line"></div></div>
+            <div class="sp-sec-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;" id="hp-ex-grid"></div>
+              <button style="width:100%;font-size:10px;color:#00e676;background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.25);border-radius:20px;padding:8px 11px;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600;" onclick="openAddExercise()">+ Add Workout</button>
+            </div>
+          </div>
+
+          <!-- MEAL STACK -->
+          <div class="sp-sec" style="margin:0 14px 10px;">
+            <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>🍽️ Meals Today<div class="sp-sec-lbl-line"></div></div>
+            <div class="sp-sec-body">
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <div class="hp-routine-item" style="display:flex;gap:10px;align-items:center;">
+                  <input type="checkbox" id="meal-0" onchange="toggleHealthItem('meal',0)" style="width:18px;height:18px;cursor:pointer;flex-shrink:0;accent-color:#00e676;">
+                  <div style="flex-shrink:0;font-size:20px;">🍳</div>
+                  <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:rgba(220,230,255,0.92);">Breakfast</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:#7a8fa8;margin-top:1px;">7:30 AM</div></div>
+                </div>
+                <div class="hp-routine-item" style="display:flex;gap:10px;align-items:center;">
+                  <input type="checkbox" id="meal-1" onchange="toggleHealthItem('meal',1)" style="width:18px;height:18px;cursor:pointer;flex-shrink:0;accent-color:#00e676;">
+                  <div style="flex-shrink:0;font-size:20px;">🥗</div>
+                  <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:rgba(220,230,255,0.92);">Lunch</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:#7a8fa8;margin-top:1px;">12:30 PM</div></div>
+                </div>
+                <div class="hp-routine-item" style="display:flex;gap:10px;align-items:center;">
+                  <input type="checkbox" id="meal-2" onchange="toggleHealthItem('meal',2)" style="width:18px;height:18px;cursor:pointer;flex-shrink:0;accent-color:#00e676;">
+                  <div style="flex-shrink:0;font-size:20px;">🍽️</div>
+                  <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:rgba(220,230,255,0.92);">Dinner</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:#7a8fa8;margin-top:1px;">7:00 PM</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MEAL PREP PLANNER -->
+          <div class="sp-sec" style="margin:0 14px 10px;">
+            <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>📅 Weekly Meal Prep<div class="sp-sec-lbl-line"></div></div>
+            <div class="sp-sec-body">
+              <div style="background:linear-gradient(135deg,rgba(255,179,0,0.08),rgba(255,179,0,0.04));border:1px solid rgba(255,179,0,0.15);border-radius:18px;padding:16px;">
+                <!-- WEEKLY MEAL PLAN TITLE -->
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffb300;letter-spacing:0.3em;margin-bottom:14px;text-transform:uppercase;">// WEEKLY MEAL PLAN</div>
+                
+                <!-- DAY SELECTOR -->
+                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:18px;" id="meal-days-selector">
+                  <button onclick="selectMealDay(0)" style="padding:10px 8px;border-radius:14px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.10);color:rgba(150,160,180,0.80);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.3s;position:relative;">Mon<div style="width:6px;height:6px;border-radius:50%;background:rgba(150,160,180,0.40);margin:6px auto 0;"></div></button>
+                  <button onclick="selectMealDay(1)" style="padding:10px 8px;border-radius:14px;background:rgba(255,179,0,0.15);border:1.5px solid rgba(255,179,0,0.40);color:#ffb300;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.3s;position:relative;">Tue<div style="width:6px;height:6px;border-radius:50%;background:#ffb300;margin:6px auto 0;"></div></button>
+                  <button onclick="selectMealDay(2)" style="padding:10px 8px;border-radius:14px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.10);color:rgba(150,160,180,0.80);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.3s;position:relative;">Wed<div style="width:6px;height:6px;border-radius:50%;background:rgba(150,160,180,0.40);margin:6px auto 0;"></div></button>
+                  <button onclick="selectMealDay(3)" style="padding:10px 8px;border-radius:14px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.10);color:rgba(150,160,180,0.80);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.3s;position:relative;">Thu<div style="width:6px;height:6px;border-radius:50%;background:rgba(150,160,180,0.40);margin:6px auto 0;"></div></button>
+                  <button onclick="selectMealDay(4)" style="padding:10px 8px;border-radius:14px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.10);color:rgba(150,160,180,0.80);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.3s;position:relative;">Fri<div style="width:6px;height:6px;border-radius:50%;background:rgba(150,160,180,0.40);margin:6px auto 0;"></div></button>
+                  <button onclick="selectMealDay(5)" style="padding:10px 8px;border-radius:14px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.10);color:rgba(150,160,180,0.80);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.3s;position:relative;">Sat<div style="width:6px;height:6px;border-radius:50%;background:rgba(150,160,180,0.40);margin:6px auto 0;"></div></button>
+                  <button onclick="selectMealDay(6)" style="padding:10px 8px;border-radius:14px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.10);color:rgba(150,160,180,0.80);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.3s;position:relative;">Sun<div style="width:6px;height:6px;border-radius:50%;background:rgba(150,160,180,0.40);margin:6px auto 0;"></div></button>
+                </div>
+                
+                <!-- MEAL SLOTS -->
+                <div style="display:flex;flex-direction:column;gap:10px;" id="meal-slots-container">
+                  <!-- Dynamically generated meal slots -->
+                </div>
+                
+                <!-- ADD MEAL BUTTON -->
+                <button onclick="openAddMeal()" style="width:100%;margin-top:10px;padding:10px;border-radius:12px;border:1.5px dashed rgba(255,179,0,0.30);background:rgba(255,179,0,0.08);color:#ffb300;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ Add Meal Slot</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CALORIE TRACKER -->
+          <div class="sp-sec" style="margin:0 14px 10px;">
+            <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>🔥 Calorie Tracker<div class="sp-sec-lbl-line"></div></div>
+            <div class="sp-sec-body">
+              <div style="background:#111820;border:1px solid rgba(255,179,0,0.12);border-radius:12px;padding:12px;margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                  <div style="font-size:11px;color:rgba(220,230,255,0.92);">Today</div>
+                  <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#ffb300;" id="hp-cal-today-val">1,245 / 2,400 kcal</div>
+                </div>
+                <div style="height:6px;background:rgba(255,179,0,0.10);border-radius:3px;overflow:hidden;margin-bottom:8px;">
+                  <div id="hp-cal-fill" style="height:100%;background:linear-gradient(90deg,#ffb300,#ff8c00);width:52%;transition:width 0.3s;"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:9px;">
+                  <div><span style="color:#7a8fa8;">Protein: </span><span style="color:#ffb300;font-weight:700;">85g / 180g</span></div>
+                  <div><span style="color:#7a8fa8;">Remaining: </span><span style="color:#00e676;font-weight:700;" id="hp-cal-remain">1,155 kcal</span></div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <button style="font-size:10px;color:#ffb300;background:rgba(255,179,0,0.08);border:1px solid rgba(255,179,0,0.25);border-radius:12px;padding:6px;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600;" onclick="addCalories(350)">+350 kcal</button>
+                <button style="font-size:10px;color:#ffb300;background:rgba(255,179,0,0.08);border:1px solid rgba(255,179,0,0.25);border-radius:12px;padding:6px;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600;" onclick="addCalories(500)">+500 kcal</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- WATER INTAKE TRACKER -->
+          <div class="sp-sec" style="margin:0 14px 10px;">
+            <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>💧 Water Intake<div class="sp-sec-lbl-line"></div></div>
+            <div class="sp-sec-body">
+              <div style="background:#111820;border:1px solid rgba(59,142,232,0.12);border-radius:12px;padding:12px;margin-bottom:8px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                  <div style="font-size:11px;color:rgba(220,230,255,0.92);">Today's intake</div>
+                  <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#3b8ee8;"><span id="water-count">6</span> / 8 glasses</div>
+                </div>
+                <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;align-items:center;" id="water-glasses"></div>
+              </div>
+              <button id="add-glass-btn" style="width:100%;font-size:12px;font-weight:700;color:#3b8ee8;background:rgba(59,142,232,0.15);border:2px solid rgba(59,142,232,0.35);border-radius:16px;padding:10px;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.2s;pointer-events:auto;position:relative;z-index:5;" onclick="addWater()">+ Add Glass</button>
+            </div>
+          </div>
+
+          <!-- SLEEP QUALITY & ENERGY -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px 12px;margin-top:8px;">
+            <div style="background:#111820;border:1px solid rgba(168,108,255,0.12);border-radius:12px;padding:12px;">
+              <div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:800;color:#a86cff;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;">😴 Sleep</div>
+              <div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:#a86cff;">7.5h</div>
+              <div style="font-size:9px;color:#7a8fa8;margin-top:4px;">Quality: Excellent</div>
+            </div>
+            <div style="background:#111820;border:1px solid rgba(0,230,118,0.12);border-radius:12px;padding:12px;">
+              <div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:800;color:#00e676;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;">⚡ Energy</div>
+              <div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:#00e676;">8 / 10</div>
+              <div style="font-size:9px;color:#7a8fa8;margin-top:4px;">Peak hours: 10am-2pm</div>
+            </div>
+          </div>
+
+          <!-- STRESS & MOOD TRACKER -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:0 14px 8px;">
+            <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.12em;color:rgba(220,230,255,0.92);text-transform:uppercase;">🧠 Stress Level</div>
+            <div style="display:flex;gap:4px;">
+              <button id="stress-low" style="padding:4px 8px !important;border:1px solid rgba(232,84,122,0.24) !important;border-radius:6px !important;background:rgba(232,84,122,0.10) !important;color:#ff7a9a !important;font-size:9px !important;cursor:pointer !important;font-weight:600 !important;transition:all 0.2s !important;pointer-events:auto !important;position:relative !important;z-index:100 !important;margin:0 !important;padding:4px 8px !important;" onclick="setStressLevel('low')">Low</button>
+              <button id="stress-med" style="padding:4px 8px !important;border:1px solid rgba(196,152,32,0.24) !important;border-radius:6px !important;background:rgba(196,152,32,0.10) !important;color:#ffb300 !important;font-size:9px !important;cursor:pointer !important;font-weight:600 !important;transition:all 0.2s !important;pointer-events:auto !important;position:relative !important;z-index:100 !important;margin:0 !important;padding:4px 8px !important;" onclick="setStressLevel('med')">Med</button>
+              <button id="stress-high" style="padding:4px 8px !important;border:1px solid rgba(232,84,122,0.35) !important;border-radius:6px !important;background:rgba(232,84,122,0.20) !important;color:#ff5a7a !important;font-size:9px !important;cursor:pointer !important;font-weight:600 !important;border-color:rgba(232,84,122,0.35) !important;transition:all 0.2s !important;pointer-events:auto !important;position:relative !important;z-index:100 !important;margin:0 !important;padding:4px 8px !important;" onclick="setStressLevel('high')">High</button>
+            </div>
+          </div>
+          <div style="padding:0 14px 12px;display:flex;gap:6px;">
+            <div id="mood-calm" class="mood-btn" style="flex:1;background:rgba(21,168,84,0.10);border:1px solid rgba(21,168,84,0.22);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all 0.2s;" onclick="setMood('calm')">
+              <div style="font-size:18px;margin-bottom:4px;">😊</div>
+              <div style="font-size:9px;color:#00e676;font-weight:700;">Calm</div>
+            </div>
+            <div id="mood-neutral" class="mood-btn" style="flex:1;background:rgba(21,168,84,0.10);border:1px solid rgba(21,168,84,0.22);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all 0.2s;" onclick="setMood('neutral')">
+              <div style="font-size:18px;margin-bottom:4px;">😐</div>
+              <div style="font-size:9px;color:#7a8fa8;font-weight:700;">Neutral</div>
+            </div>
+            <div id="mood-stressed" class="mood-btn" style="flex:1;background:rgba(232,84,122,0.10);border:1px solid rgba(232,84,122,0.22);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all 0.2s;" onclick="setMood('stressed')">
+              <div style="font-size:18px;margin-bottom:4px;">😰</div>
+              <div style="font-size:9px;color:#ff7a9a;font-weight:700;">Stressed</div>
+            </div>
+          </div>
+
+          <!-- RECIPE STACK -->
+          <div style="margin:0 14px 10px;">
+            <!-- RECIPE HEADER -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 4px;">
+              <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.12em;color:rgba(220,230,255,0.92);text-transform:uppercase;">Recipe Stack</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button onclick="filterRecipeByCalories()" style="padding:8px 14px;border-radius:20px;border:2px solid rgba(20,196,175,0.40);background:rgba(20,196,175,0.10);color:#14c4af;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:4px;">🔥 Cals</button>
+                <button onclick="openAddRecipe()" style="padding:8px 14px;border-radius:20px;border:2px solid rgba(20,196,175,0.40);background:rgba(20,196,175,0.10);color:#14c4af;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ Recipe</button>
+                <div style="cursor:pointer;color:#14c4af;font-size:12px;">▼</div>
+              </div>
+            </div>
+
+            <!-- RECIPES CONTAINER -->
+            <div style="display:flex;flex-direction:column;gap:12px;" id="recipes-container">
+              <!-- Sample Recipe -->
+              <div id="recipe-0" style="background:rgba(0,0,0,0.40);border:1px solid rgba(20,196,175,0.15);border-radius:18px;padding:16px;position:relative;">
+                <!-- Recipe Header with Expand Button -->
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+                  <div style="display:flex;gap:10px;flex:1;">
+                    <div style="font-size:28px;">🍗</div>
+                    <div style="flex:1;">
+                      <div style="font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;">High-Protein Chicken Bowl</div>
+                      <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(150,160,180,0.80);">Serves 2 · 25 min · 520kcal · 48g protein</div>
+                    </div>
+                  </div>
+                  <button onclick="toggleRecipeExpand(0)" style="background:none;border:none;color:#14c4af;font-size:14px;cursor:pointer;">▲</button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+                  <button onclick="addRecipeCalories(0)" style="padding:8px 12px;border-radius:16px;border:1.5px solid rgba(20,196,175,0.35);background:rgba(20,196,175,0.10);color:#14c4af;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:4px;">🔥 520 kcal</button>
+                  <button style="padding:8px 12px;border-radius:16px;border:1.5px solid rgba(255,179,0,0.35);background:rgba(255,179,0,0.10);color:#ffb300;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:4px;">💪 48g protein</button>
+                  <button onclick="logMealRecipe(0)" style="padding:8px 12px;border-radius:16px;border:1.5px solid rgba(20,196,175,0.35);background:rgba(20,196,175,0.10);color:#14c4af;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ Log Meal</button>
+                </div>
+
+                <!-- Expandable Content -->
+                <div id="recipe-content-0" style="display:none;">
+                  <!-- Ingredients Section -->
+                  <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid rgba(20,196,175,0.15);">
+                    <div style="font-family:'DM Mono',monospace;font-size:8px;color:#14c4af;letter-spacing:0.2em;margin-bottom:10px;text-transform:uppercase;">// INGREDIENTS</div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.30);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+                        <div style="display:flex;gap:8px;align-items:center;flex:1;">
+                          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(150,160,180,0.70);">300g</div>
+                          <div style="font-family:'Cinzel',serif;font-size:12px;color:rgba(220,230,255,0.90);">Chicken breast</div>
+                        </div>
+                        <button onclick="addToShoppingFromRecipe('Chicken breast')" style="padding:6px 10px;border-radius:12px;border:1.5px solid rgba(20,196,175,0.35);background:none;color:#14c4af;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ List</button>
+                      </div>
+                      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.30);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+                        <div style="display:flex;gap:8px;align-items:center;flex:1;">
+                          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(150,160,180,0.70);">1 cup</div>
+                          <div style="font-family:'Cinzel',serif;font-size:12px;color:rgba(220,230,255,0.90);">Quinoa</div>
+                        </div>
+                        <button onclick="addToShoppingFromRecipe('Quinoa')" style="padding:6px 10px;border-radius:12px;border:1.5px solid rgba(20,196,175,0.35);background:none;color:#14c4af;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ List</button>
+                      </div>
+                      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.30);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+                        <div style="display:flex;gap:8px;align-items:center;flex:1;">
+                          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(150,160,180,0.70);">2 tbsp</div>
+                          <div style="font-family:'Cinzel',serif;font-size:12px;color:rgba(220,230,255,0.90);">Olive oil</div>
+                        </div>
+                        <button onclick="addToShoppingFromRecipe('Olive oil')" style="padding:6px 10px;border-radius:12px;border:1.5px solid rgba(20,196,175,0.35);background:none;color:#14c4af;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ List</button>
+                      </div>
+                      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.30);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+                        <div style="display:flex;gap:8px;align-items:center;flex:1;">
+                          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(150,160,180,0.70);">1</div>
+                          <div style="font-family:'Cinzel',serif;font-size:12px;color:rgba(220,230,255,0.90);">Avocado</div>
+                        </div>
+                        <button onclick="addToShoppingFromRecipe('Avocado')" style="padding:6px 10px;border-radius:12px;border:1.5px solid rgba(20,196,175,0.35);background:none;color:#14c4af;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ List</button>
+                      </div>
+                      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.30);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+                        <div style="display:flex;gap:8px;align-items:center;flex:1;">
+                          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(150,160,180,0.70);">Handful</div>
+                          <div style="font-family:'Cinzel',serif;font-size:12px;color:rgba(220,230,255,0.90);">Spinach</div>
+                        </div>
+                        <button onclick="addToShoppingFromRecipe('Spinach')" style="padding:6px 10px;border-radius:12px;border:1.5px solid rgba(20,196,175,0.35);background:none;color:#14c4af;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ List</button>
+                      </div>
+                      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.30);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+                        <div style="display:flex;gap:8px;align-items:center;flex:1;">
+                          <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(150,160,180,0.70);">1 tsp</div>
+                          <div style="font-family:'Cinzel',serif;font-size:12px;color:rgba(220,230,255,0.90);">Turmeric</div>
+                        </div>
+                        <button onclick="addToShoppingFromRecipe('Turmeric')" style="padding:6px 10px;border-radius:12px;border:1.5px solid rgba(20,196,175,0.35);background:none;color:#14c4af;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ List</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Method Section -->
+                  <div style="padding-top:12px;border-top:1px solid rgba(20,196,175,0.15);">
+                    <div style="font-family:'DM Mono',monospace;font-size:8px;color:#14c4af;letter-spacing:0.2em;margin-bottom:10px;text-transform:uppercase;">// METHOD</div>
+                    <div style="font-family:'Cinzel',serif;font-size:11px;color:rgba(220,230,255,0.80);line-height:1.6;">Season chicken with turmeric. Cook quinoa. Pan-fry chicken in olive oil. Assemble bowl with spinach, quinoa, chicken, sliced avocado.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SHOPPING LIST -->
+          <div class="sp-sec" style="margin:0 14px 10px;">
+            <div class="sp-sec-lbl" onclick="toggleSec(this)"><span class="sp-chev">▾</span>🛒 Shopping List<div class="sp-sec-lbl-line"></div></div>
+            <div class="sp-sec-body">
+              <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;" id="shopping-list"></div>
+              <button id="add-item-btn" style="width:100%;font-size:12px;font-weight:700;color:#00e676;background:rgba(0,230,118,0.15);border:2px solid rgba(0,230,118,0.35);border-radius:12px;padding:10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;pointer-events:auto;position:relative;z-index:5;" onmouseover="this.style.background='rgba(0,230,118,0.25)'" onmouseout="this.style.background='rgba(0,230,118,0.15)'" onclick="openAddItem()">+ Add Item</button>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLANNER SCREEN -->
+  <div id="screen-planner" class="screen" style="background:linear-gradient(180deg,#e8f4fa 0%,#f0f8fc 100%);overflow-y:auto;">
+    <div style="padding:24px 16px;min-height:100vh;">
+      
+      <!-- CALENDAR HEADER -->
+      <div style="margin-bottom:32px;">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:14px;align-items:center;">
+          <!-- Sunday -->
+          <div onclick="selectPlannerDay(0)" style="text-align:center;cursor:pointer;transition:all 0.3s;padding:8px 0;border-radius:16px;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#4b5f89;font-weight:700;margin-bottom:10px;letter-spacing:0.12em;text-transform:uppercase;">SUN</div>
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#1a2a3a;line-height:1;">31</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:#3b82f6;margin:10px auto 0;"></div>
+          </div>
+          
+          <!-- Monday (Active) -->
+          <div id="planner-day-1" onclick="selectPlannerDay(1)" style="text-align:center;cursor:pointer;transition:all 0.3s;background:linear-gradient(135deg,#1e5ba8 0%,#2563b8 100%);border-radius:20px;padding:16px 12px;color:#fff;box-shadow:0 4px 16px rgba(30,91,168,0.25);">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.85);font-weight:700;margin-bottom:10px;letter-spacing:0.12em;text-transform:uppercase;">MON</div>
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#fff;line-height:1;">1</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.60);margin:10px auto 0;"></div>
+          </div>
+          
+          <!-- Tuesday -->
+          <div onclick="selectPlannerDay(2)" style="text-align:center;cursor:pointer;transition:all 0.3s;padding:8px 0;border-radius:16px;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#4b5f89;font-weight:700;margin-bottom:10px;letter-spacing:0.12em;text-transform:uppercase;">TUE</div>
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#1a2a3a;line-height:1;">2</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:#3b82f6;margin:10px auto 0;"></div>
+          </div>
+          
+          <!-- Wednesday -->
+          <div onclick="selectPlannerDay(3)" style="text-align:center;cursor:pointer;transition:all 0.3s;padding:8px 0;border-radius:16px;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#4b5f89;font-weight:700;margin-bottom:10px;letter-spacing:0.12em;text-transform:uppercase;">WED</div>
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#1a2a3a;line-height:1;">3</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:#3b82f6;margin:10px auto 0;"></div>
+          </div>
+          
+          <!-- Thursday -->
+          <div onclick="selectPlannerDay(4)" style="text-align:center;cursor:pointer;transition:all 0.3s;padding:8px 0;border-radius:16px;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#4b5f89;font-weight:700;margin-bottom:10px;letter-spacing:0.12em;text-transform:uppercase;">THU</div>
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#1a2a3a;line-height:1;">4</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:#3b82f6;margin:10px auto 0;"></div>
+          </div>
+          
+          <!-- Friday -->
+          <div onclick="selectPlannerDay(5)" style="text-align:center;cursor:pointer;transition:all 0.3s;padding:8px 0;border-radius:16px;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#4b5f89;font-weight:700;margin-bottom:10px;letter-spacing:0.12em;text-transform:uppercase;">FRI</div>
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#1a2a3a;line-height:1;">5</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:#3b82f6;margin:10px auto 0;"></div>
+          </div>
+          
+          <!-- Saturday -->
+          <div onclick="selectPlannerDay(6)" style="text-align:center;cursor:pointer;transition:all 0.3s;padding:8px 0;border-radius:16px;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#4b5f89;font-weight:700;margin-bottom:10px;letter-spacing:0.12em;text-transform:uppercase;">SAT</div>
+            <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#1a2a3a;line-height:1;">6</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:#3b82f6;margin:10px auto 0;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD TASK CARD -->
+      <div style="background:#fff;border-radius:28px;padding:24px;margin-bottom:28px;box-shadow:0 2px 12px rgba(30,91,168,0.12);border:1px solid rgba(30,91,168,0.08);">
+        
+        <!-- Task Input -->
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+          <div style="font-size:26px;flex-shrink:0;">✏️</div>
+          <input id="task-input" type="text" placeholder="Add a task for today..." style="flex:1;border:none;background:transparent;font-size:16px;color:#1a2a3a;font-family:'DM Sans',sans-serif;outline:none;font-weight:500;" onkeydown="if(event.key==='Enter')addPlannerTask()" onfocus="this.style.color='#1a2a3a'" onblur="if(!this.value)this.style.color='rgba(26,42,58,0.40)'">
+        </div>
+        
+        <!-- Controls Row -->
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          
+          <!-- Time Selector -->
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(30,91,168,0.08);border-radius:14px;padding:10px 14px;border:1.5px solid rgba(30,91,168,0.15);flex-shrink:0;">
+            <span style="font-size:20px;opacity:0.8;">🕐</span>
+            <input id="task-time" type="time" value="09:00" style="border:none;background:transparent;color:#1e5ba8;font-weight:700;font-size:15px;font-family:'DM Mono',monospace;outline:none;width:60px;" onchange="">
+          </div>
+          
+          <!-- Priority Buttons -->
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="priority-btn" data-priority="High" onclick="setTaskPriority('High')" style="padding:10px 16px;border-radius:12px;border:1.5px solid rgba(30,91,168,0.20);background:transparent;color:#4b5f89;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;">High</button>
+            
+            <button class="priority-btn active" id="priority-med" data-priority="Med" onclick="setTaskPriority('Med')" style="padding:10px 16px;border-radius:12px;border:2px solid #1e5ba8;background:rgba(30,91,168,0.08);color:#1e5ba8;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;">Med</button>
+            
+            <button class="priority-btn" data-priority="Low" onclick="setTaskPriority('Low')" style="padding:10px 16px;border-radius:12px;border:1.5px solid rgba(30,91,168,0.20);background:transparent;color:#4b5f89;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;">Low</button>
+          </div>
+          
+          <!-- Add Button -->
+          <button onclick="addPlannerTask()" style="padding:11px 24px;border-radius:12px;border:none;background:linear-gradient(135deg,#1e5ba8 0%,#2563b8 100%);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-left:auto;box-shadow:0 2px 8px rgba(30,91,168,0.20);">Add Task</button>
+        </div>
+      </div>
+
+      <!-- TASKS LIST -->
+      <div style="display:flex;flex-direction:column;gap:12px;" id="planner-tasks-container">
+        <!-- Tasks will be rendered here -->
+      </div>
+      
+    </div>
+  </div>
+
+</div>
+
+
+<!-- CANDLE OVERLAY -->
+<div id="candle-overlay" onclick="closeCandle(event)">
+  <div class="candle-wrap" style="position:relative">
+    <div class="candle-glow"></div>
+    <div class="candle-flame"><div class="flame-outer"></div><div class="flame-inner"></div></div>
+    <div class="candle-body"></div>
+    <div class="candle-base"></div>
+  </div>
+  <div class="candle-verse">
+    <div class="candle-verse-text" id="candle-verse-text">\"The LORD is my light and my salvation — whom shall I fear?\"</div>
+    <div class="candle-verse-ref">— Psalm 27:1</div>
+  </div>
+  <button class="candle-close" onclick="closeCandle()">Close</button>
+</div>
+
+<!-- ADD PRAYER MODAL -->
+<div id="add-prayer-modal" onclick="closeAddPrayer(event)">
+  <div class="ap-sheet">
+    <div class="ap-title">🙏 Add Prayer Request</div>
+    <input class="ap-inp" id="ap-inp" placeholder="What do you bring before God?" onkeydown="if(event.key==='Enter')saveAddPrayer()">
+    <div class="ap-btns">
+      <button class="ap-cancel" style="flex:1;padding:12px;border:1.5px solid rgba(255,255,255,0.10);border-radius:13px;background:rgba(255,255,255,0.05);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(200,190,255,0.55);cursor:pointer;" onclick="closeAddPrayer()">Cancel</button>
+      <button class="ap-save" onclick="saveAddPrayer()">Add ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD VERSE MODAL -->
+<div id="add-verse-modal" onclick="closeAddVerse(event)">
+  <div class="ap-sheet">
+    <div class="ap-title">✝️ Add Favourite Verse</div>
+    <textarea class="ap-inp" id="av-text" placeholder="Enter the verse text…" style="resize:vertical;min-height:80px;"></textarea>
+    <input class="ap-inp" id="av-ref" placeholder="Reference (e.g., John 3:16)" onkeydown="if(event.key==='Enter')saveAddVerse()">
+    <div class="ap-btns">
+      <button class="ap-cancel" style="flex:1;padding:12px;border:1.5px solid rgba(255,255,255,0.10);border-radius:13px;background:rgba(255,255,255,0.05);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(200,190,255,0.55);cursor:pointer;" onclick="closeAddVerse()">Cancel</button>
+      <button class="ap-save" onclick="saveAddVerse()">Add ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD ROUTINE MODAL -->
+<div id="add-routine-modal" onclick="closeAddRoutine(event)">
+  <div class="ap-sheet">
+    <div class="ap-title">💪 Add Daily Routine</div>
+    <input class="ap-inp" id="ar-name" placeholder="Routine name (e.g., Yoga, Journaling)" onkeydown="if(event.key==='Enter')saveAddRoutine()">
+    <input class="ap-inp" id="ar-emoji" placeholder="Emoji (e.g., 🧘, 📔, 🚶)" onkeydown="if(event.key==='Enter')saveAddRoutine()">
+    <input class="ap-inp" id="ar-time" placeholder="Time (e.g., 9:00 AM)" onkeydown="if(event.key==='Enter')saveAddRoutine()">
+    <div class="ap-btns">
+      <button class="ap-cancel" style="flex:1;padding:12px;border:1.5px solid rgba(255,255,255,0.10);border-radius:13px;background:rgba(255,255,255,0.05);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(200,190,255,0.55);cursor:pointer;" onclick="closeAddRoutine()">Cancel</button>
+      <button class="ap-save" onclick="saveAddRoutine()">Add ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SUPPLEMENT MODAL -->
+<div id="add-supplement-modal" onclick="closeAddSupplement(event)">
+  <div class="ap-sheet">
+    <div class="ap-title">💊 Add Supplement</div>
+    <input class="ap-inp" id="as-name" placeholder="Supplement name (e.g., Vitamin D, Iron)" onkeydown="if(event.key==='Enter')saveAddSupplement()">
+    <div class="ap-btns">
+      <button class="ap-cancel" style="flex:1;padding:12px;border:1.5px solid rgba(255,255,255,0.10);border-radius:13px;background:rgba(255,255,255,0.05);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(200,190,255,0.55);cursor:pointer;" onclick="closeAddSupplement()">Cancel</button>
+      <button class="ap-save" onclick="saveAddSupplement()">Add ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD WORKOUT MODAL -->
+<div id="add-workout-modal" onclick="closeAddWorkout(event)">
+  <div class="ap-sheet">
+    <div class="ap-title">🏋️ Add Workout</div>
+    <input class="ap-inp" id="aw-name" placeholder="Workout name (e.g., Running, Yoga)" onkeydown="if(event.key==='Enter')saveAddWorkout()">
+    <input class="ap-inp" id="aw-duration" placeholder="Duration in minutes (e.g., 30)" onkeydown="if(event.key==='Enter')saveAddWorkout()">
+    <div class="ap-btns">
+      <button class="ap-cancel" style="flex:1;padding:12px;border:1.5px solid rgba(255,255,255,0.10);border-radius:13px;background:rgba(255,255,255,0.05);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(200,190,255,0.55);cursor:pointer;" onclick="closeAddWorkout()">Cancel</button>
+      <button class="ap-save" onclick="saveAddWorkout()">Add ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SHOPPING ITEM MODAL -->
+<div id="add-shopping-modal" onclick="closeAddShopping(event)">
+  <div class="ap-sheet">
+    <div class="ap-title">🛒 Add Shopping Item</div>
+    <input class="ap-inp" id="ash-item" placeholder="Item name (e.g., Organic Chicken)" onkeydown="if(event.key==='Enter')saveAddShopping()">
+    <div class="ap-btns">
+      <button class="ap-cancel" style="flex:1;padding:12px;border:1.5px solid rgba(255,255,255,0.10);border-radius:13px;background:rgba(255,255,255,0.05);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(200,190,255,0.55);cursor:pointer;" onclick="closeAddShopping()">Cancel</button>
+      <button class="ap-save" onclick="saveAddShopping()">Add ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MEAL MODAL -->
+<div id="add-meal-modal" onclick="closeAddMeal(event)">
+  <div class="ap-sheet">
+    <div class="ap-title">🍽️ Add Meal Slot</div>
+    <input class="ap-inp" id="am-time" placeholder="Time (e.g., 06:00, 11:30)" onkeydown="if(event.key==='Enter')saveAddMeal()">
+    <input class="ap-inp" id="am-name" placeholder="Meal name (e.g., Hi-Protein, Complete)" onkeydown="if(event.key==='Enter')saveAddMeal()">
+    <div class="ap-btns">
+      <button class="ap-cancel" style="flex:1;padding:12px;border:1.5px solid rgba(255,255,255,0.10);border-radius:13px;background:rgba(255,255,255,0.05);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(200,190,255,0.55);cursor:pointer;" onclick="closeAddMeal()">Cancel</button>
+      <button class="ap-save" onclick="saveAddMeal()">Add ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD RECIPE MODAL -->
+<div id="add-recipe-modal" onclick="closeAddRecipe(event)">
+  <div class="ap-sheet">
+    <div class="ap-title">🍽️ Add Recipe</div>
+    <input class="ap-inp" id="ar-rname" placeholder="Recipe name" onkeydown="if(event.key==='Enter')saveAddRecipe()">
+    <input class="ap-inp" id="ar-emoji" placeholder="Emoji (e.g., 🍗, 🥗)" onkeydown="if(event.key==='Enter')saveAddRecipe()">
+    <input class="ap-inp" id="ar-serves" type="number" placeholder="Serves (e.g., 2)" onkeydown="if(event.key==='Enter')saveAddRecipe()">
+    <input class="ap-inp" id="ar-time" type="number" placeholder="Time in minutes (e.g., 25)" onkeydown="if(event.key==='Enter')saveAddRecipe()">
+    <input class="ap-inp" id="ar-cal" type="number" placeholder="Calories (e.g., 520)" onkeydown="if(event.key==='Enter')saveAddRecipe()">
+    <input class="ap-inp" id="ar-protein" type="number" placeholder="Protein in grams (e.g., 48)" onkeydown="if(event.key==='Enter')saveAddRecipe()">
+    <textarea class="ap-inp" id="ar-method" placeholder="Cooking method..." style="resize:vertical;min-height:80px;"></textarea>
+    <div class="ap-btns">
+      <button class="ap-cancel" style="flex:1;padding:12px;border:1.5px solid rgba(255,255,255,0.10);border-radius:13px;background:rgba(255,255,255,0.05);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(200,190,255,0.55);cursor:pointer;" onclick="closeAddRecipe()">Cancel</button>
+      <button class="ap-save" onclick="saveAddRecipe()">Add ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT SHEET -->
+<div id="export-sheet" onclick="closeExportSheet(event)">
+  <div class="es-body">
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:rgba(230,225,255,0.90);margin-bottom:14px;">Export Zola Data</div>
+    <div class="es-btn-grid">
+      <button class="es-btn" onclick="doShare();closeExportSheet()">
+        <span style="font-size:22px;">↑</span>Share
+      </button>
+      <button class="es-btn" onclick="doSave();closeExportSheet()">
+        <span style="font-size:22px;">💾</span>Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" onclick="dismissToast()"></div>
+
+<!-- AUDIO ELEMENT -->
+<audio id="sp-audio" preload="auto" crossorigin="anonymous"></audio>
+
+<!-- WELLNESS AUDIO ELEMENT -->
+<audio id="wellness-audio" preload="auto" crossorigin="anonymous"></audio>
+
+<script>
+/* ═══ CORE ═══ */
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+var DAY=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ═══ CLOCK ═══ */
+function tick(){var d=new Date(),h=d.getHours(),m=d.getMinutes();document.getElementById('sbar-time').textContent=(h%12||12)+':'+(m<10?'0':'')+m+(h<12?' AM':' PM');}
+tick();setInterval(tick,30000);
+
+/* ═══ STARS ═══ */
+(function(){var c=document.getElementById('stars');for(var i=0;i<70;i++){var s=document.createElement('div');s.className='star';var sz=Math.random()*2.8+0.4;s.style.cssText='width:'+sz+'px;height:'+sz+'px;top:'+Math.random()*100+'%;left:'+Math.random()*100+'%;animation-duration:'+(Math.random()*5+2)+'s;animation-delay:'+Math.random()*7+'s;';c.appendChild(s);}})();
+
+/* ═══ SCREEN SWITCHER ═══ */
+function switchScreen(name){var tabs=document.querySelectorAll('.screen-tab');var screens=document.querySelectorAll('.screen');tabs.forEach(t=>t.classList.remove('active'));screens.forEach(s=>s.classList.remove('active'));document.querySelector('[onclick*="'+name+'"]').classList.add('active');document.getElementById('screen-'+name).classList.add('active');}
+
+/* ═══ VERSES ═══ */
+var VERSES=[{t:'\"I can do all things through Christ which strengtheneth me.\"',r:'— Philippians 4:13'},{t:'\"The LORD is my shepherd; I shall not want.\"',r:'— Psalm 23:1'},{t:'\"Trust in the LORD with all your heart.\"',r:'— Proverbs 3:5'},{t:'\"Be still, and know that I am God.\"',r:'— Psalm 46:10'},{t:'\"For I know the plans I have for you.\"',r:'— Jeremiah 29:11'},{t:'\"The joy of the LORD is your strength.\"',r:'— Nehemiah 8:10'},{t:'\"Ask and it will be given to you.\"',r:'— Matthew 7:7'},{t:'\"Cast all your anxiety on him.\"',r:'— 1 Peter 5:7'},{t:'\"Come to me, all you who are weary.\"',r:'— Matthew 11:28'},{t:'\"The LORD is my light and my salvation.\"',r:'— Psalm 27:1'}];
+var _vi=0,_favVerses=lsGet('sc_favVerses')||[];(function(){var d=new Date();var doy=Math.floor((d-new Date(d.getFullYear(),0,0))/86400000);_vi=doy%VERSES.length;renderVerse();})();
+function renderVerse(){
+  document.getElementById('sp-verse-text').textContent=VERSES[_vi].t;
+  document.getElementById('sp-verse-ref').textContent=VERSES[_vi].r;
+  var isFav=false;
+  for(var i=0;i<_favVerses.length;i++){
+    if(_favVerses[i].i===_vi){
+      isFav=true;
+      break;
+    }
+  }
+  var fb=document.getElementById('fav-btn');
+  fb.textContent=isFav?'♥ Saved':'♡ Save';
+  if(isFav)fb.classList.add('active');
+  else fb.classList.remove('active');
+  var cv=document.getElementById('candle-verse-text');
+  if(cv)cv.textContent=VERSES[_vi].t;
+}
+function nextVerse(){_vi=(_vi+1)%VERSES.length;renderVerse();}
+function prevVerse(){_vi=(_vi-1+VERSES.length)%VERSES.length;renderVerse();}
+function toggleFav(){
+  var isFav=false;
+  for(var i=0;i<_favVerses.length;i++){
+    if(_favVerses[i].i===_vi){
+      isFav=true;
+      break;
+    }
+  }
+  if(isFav){
+    var newFavs=[];
+    for(var j=0;j<_favVerses.length;j++){
+      if(_favVerses[j].i!==_vi)newFavs.push(_favVerses[j]);
+    }
+    _favVerses=newFavs;
+  }else{
+    _favVerses.push({i:_vi,t:VERSES[_vi].t,r:VERSES[_vi].r,read:false});
+  }
+  lsSet('sc_favVerses',_favVerses);
+  renderVerse();
+  renderFavs();
+  showToast(isFav?'Removed':'Saved ♥');
+}
+
+function toggleVerseRead(){
+  var chk=document.getElementById('verse-done');
+  if(chk)showToast(chk.checked?'✦ Verse reflected':'');
+}
+
+function toggleFavVerse(idx){
+  if(idx<0||idx>=_favVerses.length)return;
+  _favVerses[idx].read=!_favVerses[idx].read;
+  lsSet('sc_favVerses',_favVerses);
+  renderFavs();
+}
+
+function renderFavs(){
+  var list=document.getElementById('fav-list');
+  if(!list)return;
+  if(!_favVerses.length){
+    list.innerHTML='<div style="font-size:12px;font-style:italic;color:rgba(200,190,255,0.26);">Favourite verses appear here…</div>';
+    return;
+  }
+  var html='';
+  for(var i=0;i<_favVerses.length;i++){
+    var f=_favVerses[i];
+    var checked=f.read?' checked':'';
+    html+='<div style="background:rgba(123,79,212,0.08);border:1px solid rgba(123,79,212,0.18);border-radius:14px;padding:10px 13px;margin-bottom:6px;display:flex;gap:8px;align-items:flex-start;"><input type="checkbox" '+checked+' onchange="toggleFavVerse('+i+')" style="width:18px;height:18px;cursor:pointer;margin-top:2px;flex-shrink:0;accent-color:var(--sp);"><div style="flex:1;'+(f.read?'opacity:0.6;':'')+'"><div style="font-family:Cinzel,serif;font-size:12px;color:rgba(230,225,255,0.80);line-height:1.7;font-style:italic;'+(f.read?'text-decoration:line-through;':'')+'">'+f.t+'</div><div style="font-family:DM Mono,monospace;font-size:9.5px;color:var(--sp2);margin-top:5px;">'+f.r+'</div></div></div>';
+  }
+  list.innerHTML=html;
+}
+renderFavs();
+
+/* ═══ ADD VERSE ═══ */
+function openAddVerse(){
+  document.getElementById('av-text').value='';
+  document.getElementById('av-ref').value='';
+  document.getElementById('add-verse-modal').classList.add('open');
+  setTimeout(function(){document.getElementById('av-text').focus();},80);
+}
+function closeAddVerse(e){
+  if(!e||e.target===document.getElementById('add-verse-modal'))
+    document.getElementById('add-verse-modal').classList.remove('open');
+}
+function saveAddVerse(){
+  var txt=document.getElementById('av-text').value.trim();
+  var ref=document.getElementById('av-ref').value.trim();
+  if(!txt||!ref)return;
+  _favVerses.push({t:'"'+txt+'"',r:'— '+ref});
+  lsSet('sc_favVerses',_favVerses);
+  document.getElementById('add-verse-modal').classList.remove('open');
+  renderFavs();
+  showToast('Verse added ✦');
+}
+
+/* ═══ PRAYERS ═══ */
+var _prayers=lsGet('sc_prayers')||[];
+function renderPrayers(){
+  var list=document.getElementById('sp-prayer-list');
+  if(!list)return;
+  if(!_prayers.length){
+    list.innerHTML='<div style="font-size:12px;font-style:italic;color:rgba(200,190,255,0.26);">Prayer requests appear here…</div>';
+    return;
+  }
+  var html='';
+  for(var i=0;i<_prayers.length;i++){
+    var p=_prayers[i];
+    var cls='sp-prayer-item'+(p.done?' prayed':'');
+    html+='<div class="'+cls+'" onclick="togglePrayer('+i+')"><div class="sp-p-chk"></div><span class="sp-p-text">'+p.text+'</span></div>';
+  }
+  list.innerHTML=html;
+}
+function togglePrayer(i){_prayers[i].done=!_prayers[i].done;lsSet('sc_prayers',_prayers);renderPrayers();showToast(_prayers[i].done?'Offered ✦':'Unmarked');}
+function openAddPrayer(){
+  document.getElementById('ap-inp').value='';
+  document.getElementById('add-prayer-modal').classList.add('open');
+  setTimeout(function(){document.getElementById('ap-inp').focus();},80);
+}
+function closeAddPrayer(e){if(!e||e.target===document.getElementById('add-prayer-modal'))document.getElementById('add-prayer-modal').classList.remove('open');}
+function saveAddPrayer(){var val=document.getElementById('ap-inp').value.trim();if(!val)return;_prayers.push({text:val,done:false});lsSet('sc_prayers',_prayers);document.getElementById('add-prayer-modal').classList.remove('open');renderPrayers();showToast('Added 🙏');}
+renderPrayers();
+
+/* ═══ READING PLAN ═══ */
+var READING_PLAN=['Genesis 1-2','Genesis 3-5','Genesis 6-9','Genesis 10-15','Genesis 16-21','Genesis 22-27','Genesis 28-33','Genesis 34-39','Genesis 40-45','Genesis 46-50','Exodus 1-7','Exodus 8-14','Exodus 15-20','Exodus 21-27','Exodus 28-34','Matthew 1-4','Matthew 5-7','Matthew 8-11','Matthew 12-15','Matthew 16-19','Matthew 20-23','Matthew 24-28','John 1-5','John 6-10','John 11-15','John 16-21','Psalm 1-30','Psalm 31-60','Proverbs 1-15','Romans 1-16'];
+var _rp=lsGet('sc_readingPlan')||{day:1,completed:[]};
+function renderReadingPlan(){var day=Math.min(_rp.day||1,30);var days=document.getElementById('rp-days');if(!days)return;var html='';for(var i=1;i<=30;i++){var done=_rp.completed.indexOf(i)>=0;var isToday=i===day;var cls='rp-dot'+(done?' done':isToday?' today':'');html+='<div class=\"'+cls+'\" title=\"Day '+i+': '+READING_PLAN[i-1]+'\" onclick=\"jumpRPDay('+i+')\" style=\"cursor:pointer;\">'+(done?'✓':i)+'</div>';}days.innerHTML=html;var pct=Math.round((_rp.completed.length/30)*100);var bar=document.getElementById('rp-bar');if(bar)bar.style.width=pct+'%;';var todayRef=document.getElementById('rp-today-ref');if(todayRef)todayRef.textContent='Day '+day+' · '+READING_PLAN[day-1];var pctEl=document.getElementById('rp-pct');if(pctEl)pctEl.textContent=pct+'% complete';}
+function markReadingDay(){var day=_rp.day||1;if(_rp.completed.indexOf(day)===-1)_rp.completed.push(day);if(day<30)_rp.day=day+1;lsSet('sc_readingPlan',_rp);renderReadingPlan();showToast('Day marked! '+_rp.completed.length+'/30');}
+function jumpRPDay(d){_rp.day=d;lsSet('sc_readingPlan',_rp);renderReadingPlan();}
+renderReadingPlan();
+
+/* ═══ GRATITUDE ═══ */
+var _gratEntries=lsGet('sc_grat')||[];
+function gratCount(){var ta=document.getElementById('sp-grat-ta');document.getElementById('grat-count').textContent=(ta?ta.value.length:0)+' / 500';}
+function spGratSave(){var ta=document.getElementById('sp-grat-ta');if(!ta||!ta.value.trim())return;_gratEntries.unshift({text:ta.value.trim(),date:new Date().toLocaleDateString(),done:false});ta.value='';gratCount();lsSet('sc_grat',_gratEntries);renderGratEntries();showToast('Saved ✦');}
+function toggleGratEntry(idx){
+  if(idx<0||idx>=_gratEntries.length)return;
+  _gratEntries[idx].done=!_gratEntries[idx].done;
+  lsSet('sc_grat',_gratEntries);
+  renderGratEntries();
+}
+
+function renderGratEntries(){
+  var c=document.getElementById('sp-grat-entries');
+  if(!c||!_gratEntries.length){
+    if(c)c.innerHTML='<div style="font-size:12px;font-style:italic;color:rgba(200,190,255,0.26);">Reflections appear here…</div>';
+    return;
+  }
+  var html='';
+  for(var i=0;i<_gratEntries.length;i++){
+    var e=_gratEntries[i];
+    var checked=e.done?' checked':'';
+    html+='<div class="sp-grat-entry" style="display:flex;gap:8px;align-items:flex-start;'+(e.done?'opacity:0.5;':'')+'"><input type="checkbox" '+checked+' onchange="toggleGratEntry('+i+')" style="width:16px;height:16px;cursor:pointer;margin-top:4px;flex-shrink:0;accent-color:var(--sp);"><div style="flex:1;"><div style="font-family:DM Mono,monospace;font-size:8px;color:rgba(200,190,255,0.32);margin-bottom:5px;">'+e.date+'</div><div class="sp-grat-entry-text" style="'+(e.done?'text-decoration:line-through;':'')+'">'+e.text+'</div></div></div>';
+  }
+  c.innerHTML=html;
+}
+renderGratEntries();
+
+/* ═══ CANDLE ═══ */
+function openCandle(){document.getElementById('candle-overlay').classList.add('open');document.getElementById('candle-trigger').classList.add('lit');document.getElementById('candle-trigger').textContent='🕯 Lit';}
+function closeCandle(e){if(!e||e.target===document.getElementById('candle-overlay'))document.getElementById('candle-overlay').classList.remove('open');}
+
+/* ═══ AUDIO ═══ */
+(function(){
+  // GitHub repository configuration
+  var GITHUB_USER='YOUR_GITHUB_USERNAME';
+  var GITHUB_REPO='zola-audio';
+  var GITHUB_BRANCH='main';
+  var AUDIO_PATH='audio';
+  
+  function getGitHubURL(filename){
+    return 'https://raw.githubusercontent.com/'+GITHUB_USER+'/'+GITHUB_REPO+'/'+GITHUB_BRANCH+'/'+AUDIO_PATH+'/'+filename;
+  }
+  
+  var TRACKS=[
+    {title:'Josh 1:8 · 1 John 3:1 · Romans 8:1',duration:260,filename:'Josh_1_8_1John_3_1_Rom8_1.mp3'},
+    {title:'Isaiah 41:10 - Fear Not',duration:180,filename:'Isaiah_41_10.mp3'},
+    {title:'Jeremiah 31:3 · Lamentations 3:22-23',duration:240,filename:'Jeremiah_31_3_Lamentations_3_22_-_23__1_.mp3'},
+    {title:'Psalm 91 - Protection',duration:320,filename:'Psalm_91.mp3'},
+    {title:'Psalm 124 - Thanksgiving',duration:280,filename:'Psalm_124.mp3'}
+  ];
+  
+  var _cur=0;
+  var aud=null;
+  var btn=null;
+  var icon=null;
+  var seek=null;
+  var curEl=null;
+  var durEl=null;
+  var titleEl=null;
+  var _playing=false;
+  var _currentTime=0;
+  var _duration=180;
+  var _timer=null;
+  
+  function fmt(s){
+    var m=Math.floor(s/60);
+    var ss=Math.floor(s%60);
+    return m+':'+(ss<10?'0':'')+ss;
+  }
+  
+  function init(){
+    aud=document.getElementById('sp-audio');
+    btn=document.getElementById('audio-play-btn');
+    icon=document.getElementById('audio-play-icon');
+    seek=document.getElementById('audio-seek');
+    curEl=document.getElementById('audio-cur');
+    durEl=document.getElementById('audio-dur');
+    titleEl=document.getElementById('audio-now-title');
+    
+    if(btn){
+      btn.addEventListener('click',function(){
+        audioToggle();
+      });
+    }
+    
+    if(seek){
+      seek.addEventListener('input',function(e){
+        audioSeek(e.target.value);
+      });
+    }
+    
+    // Add track click listeners
+    var trackEls=document.querySelectorAll('.sp-audio-track');
+    for(var i=0;i<trackEls.length;i++){
+      (function(idx){
+        trackEls[idx].addEventListener('click',function(){
+          audioLoad(idx);
+        });
+      })(i);
+    }
+    
+    setActiveTrack(0);
+  }
+  
+  function setPlaying(p){
+    _playing=p;
+    if(!btn||!icon)return;
+    
+    if(p){
+      icon.innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+      btn.classList.add('playing');
+      
+      if(TRACKS[_cur]&&TRACKS[_cur].filename&&aud){
+        var src=getGitHubURL(TRACKS[_cur].filename);
+        aud.src=src;
+        aud.crossOrigin='anonymous';
+        
+        aud.onloadedmetadata=function(){
+          _duration=aud.duration||TRACKS[_cur].duration;
+          durEl.textContent=fmt(_duration);
+        };
+        
+        aud.onended=function(){
+          _currentTime=0;
+          _cur=(_cur+1)%TRACKS.length;
+          audioLoad(_cur);
+        };
+        
+        try{
+          aud.play().catch(function(e){
+            console.warn('Playback failed:',e.message);
+            showToast('⚠ Audio playback unavailable');
+          });
+        }catch(e){
+          console.warn('Play error:',e);
+        }
+      }
+      
+      if(_timer)clearInterval(_timer);
+      _timer=setInterval(function(){
+        if(!_playing||!aud){clearInterval(_timer);return;}
+        _currentTime=aud.currentTime||_currentTime;
+        if(seek)seek.value=(_currentTime/_duration)*100;
+        if(curEl)curEl.textContent=fmt(_currentTime);
+      },100);
+    }else{
+      icon.innerHTML='<polygon points="5,3 19,12 5,21"/>';
+      btn.classList.remove('playing');
+      if(aud)try{aud.pause();}catch(e){}
+      if(_timer)clearInterval(_timer);
+    }
+  }
+  
+  function setActiveTrack(i){
+    var tracks=document.querySelectorAll('.sp-audio-track');
+    for(var j=0;j<tracks.length;j++){
+      if(j===i)tracks[j].classList.add('active');
+      else tracks[j].classList.remove('active');
+    }
+    
+    if(TRACKS[i]){
+      _duration=TRACKS[i].duration||180;
+      if(titleEl)titleEl.textContent='Today\'s Reading — '+TRACKS[i].title;
+    }
+    
+    _currentTime=0;
+    if(seek)seek.value=0;
+    if(curEl)curEl.textContent='0:00';
+    if(durEl)durEl.textContent=fmt(_duration);
+  }
+  
+  window.audioToggle=function(){
+    try{
+      setPlaying(!_playing);
+    }catch(e){
+      console.error('Toggle error:',e);
+    }
+  };
+  
+  window.audioSeek=function(v){
+    try{
+      if(aud){
+        aud.currentTime=(v/100)*_duration;
+        _currentTime=aud.currentTime;
+      }
+      if(curEl)curEl.textContent=fmt(_currentTime);
+    }catch(e){
+      console.error('Seek error:',e);
+    }
+  };
+  
+  window.audioLoad=function(i){
+    try{
+      setPlaying(false);
+      if(_timer)clearInterval(_timer);
+      _cur=i;
+      setActiveTrack(i);
+    }catch(e){
+      console.error('Load error:',e);
+    }
+  };
+  
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',init);
+  }else{
+    init();
+  }
+})();}); }catch(e){console.log('Audio error:',e);}
+      }
+      if(_timer)clearInterval(_timer);
+      _timer=setInterval(function(){
+        if(!_playing){clearInterval(_timer);return;}
+        _currentTime+=0.1;
+        if(_currentTime>=_duration){
+          _currentTime=0;
+          _cur=(_cur+1)%TRACKS.length;
+          audioLoad(_cur);
+          return;
+        }
+        seek.value=(_currentTime/_duration)*100;
+        curEl.textContent=fmt(_currentTime);
+      },100);
+    }else{
+      icon.innerHTML='<polygon points="5,3 19,12 5,21"/>';
+      btn.classList.remove('playing');
+      if(aud)try{aud.pause();}catch(e){}
+      if(_timer)clearInterval(_timer);
+    }
+  }
+  
+  function setActiveTrack(i){
+    var tracks=document.querySelectorAll('.sp-audio-track');
+    for(var j=0;j<tracks.length;j++){
+      if(j===i)tracks[j].classList.add('active');
+      else tracks[j].classList.remove('active');
+    }
+    _duration=TRACKS[i].duration||180;
+    titleEl.textContent='Today\'s Reading — '+TRACKS[i].title;
+    _currentTime=0;
+    seek.value=0;
+    curEl.textContent='0:00';
+    durEl.textContent=fmt(_duration);
+  }
+  
+  window.audioToggle=function(){
+    setPlaying(!_playing);
+  };
+  
+  window.audioSeek=function(v){
+    _currentTime=(v/100)*_duration;
+    curEl.textContent=fmt(_currentTime);
+  };
+  
+  window.audioLoad=function(i){
+    setPlaying(false);
+    if(_timer)clearInterval(_timer);
+    _cur=i;
+    setActiveTrack(i);
+  };
+  
+  setActiveTrack(0);
+})();
+
+/* ═══ SECTIONS ═══ */
+function toggleSec(el){
+  if(!el)return;
+  var parent=el.parentElement;
+  if(!parent)return;
+  parent.classList.toggle('collapsed');
+}
+
+/* ═══ WELLNESS TABS ═══ */
+function toggleTab(el){
+  if(!el)return;
+  el.classList.toggle('collapsed');
+  var content=el.nextElementSibling;
+  if(content){
+    content.classList.toggle('collapsed');
+  }
+}
+
+/* ═══ WELLNESS DATA ═══ */
+var _jeEntries=lsGet('zola_je')||[];function jeCount(){var ta=document.getElementById('je-ta');document.getElementById('je-count').textContent=(ta?ta.value.length:0)+' / 300';}
+function jeSave(){var ta=document.getElementById('je-ta');if(!ta||!ta.value.trim())return;_jeEntries.unshift({text:ta.value.trim(),date:new Date().toLocaleDateString()});ta.value='';jeCount();lsSet('zola_je',_jeEntries);renderJEEntries();showToast('Saved ✦');}
+function renderJEEntries(){
+  var c=document.getElementById('je-entries');
+  if(!c||!_jeEntries.length)return;
+  var html='';
+  var limit=Math.min(5,_jeEntries.length);
+  for(var i=0;i<limit;i++){
+    var e=_jeEntries[i];
+    html+='<div class="je-entry"><div style="font-size:9px;color:var(--t3);font-family:DM Mono,monospace;font-weight:600;">'+e.date+'</div><div style="font-size:11px;color:var(--t1);margin-top:4px;line-height:1.5;">'+e.text+'</div></div>';
+  }
+  c.innerHTML=html;
+}
+renderJEEntries();
+
+/* ═══ HEALTH ROUTINES ═══ */
+/* ═══ HEALTH TRACKING ═══ */
+var _healthState={
+  routines:[{name:'Stretch',emoji:'💪',time:'7:00 AM',done:false},{name:'Meditate',emoji:'🧘',time:'8:00 AM',done:false},{name:'Exercise',emoji:'🏃',time:'6:00 PM',done:false},{name:'Sleep',emoji:'😴',time:'10:00 PM',done:false}],
+  supplements:[{name:'Vitamin D3',done:false},{name:'Omega-3',done:false}],
+  exercises:[{name:'Cardio',done:false},{name:'Strength',done:false}],
+  meals:[{name:'Breakfast',done:false},{name:'Lunch',done:false},{name:'Dinner',done:false}],
+  mealDays:[false,false,false,false,false,false,false],
+  shopping:[{name:'Organic Chicken Breast',done:false},{name:'Wild Salmon Fillets',done:true},{name:'Leafy Greens Mix',done:false},{name:'Greek Yogurt',done:false}]
+};
+
+function loadHealthState(){
+  var saved=lsGet('health_state');
+  if(saved)_healthState=saved;
+}
+
+function saveHealthState(){
+  lsSet('health_state',_healthState);
+}
+
+function toggleHealthItem(type,idx){
+  if(!_healthState[type]||idx<0||idx>=_healthState[type].length)return;
+  _healthState[type][idx].done=!_healthState[type][idx].done;
+  saveHealthState();
+  updateHealthUI();
+}
+
+function toggleMealDay(idx){
+  if(idx<0||idx>=_healthState.mealDays.length)return;
+  _healthState.mealDays[idx]=!_healthState.mealDays[idx];
+  saveHealthState();
+  var el=document.getElementById('mealday-'+idx);
+  if(el)el.textContent=_healthState.mealDays[idx]?'✓ Meal':'—';
+}
+
+function toggleShoppingItem(idx){
+  if(!_healthState.shopping||idx<0||idx>=_healthState.shopping.length)return;
+  _healthState.shopping[idx].done=!_healthState.shopping[idx].done;
+  saveHealthState();
+  updateHealthUI();
+}
+
+function updateHealthUI(){
+  updateRoutinesUI();
+  updateSupplementUI();
+  updateExerciseUI();
+  updateMealUI();
+  updateShoppingUI();
+}
+
+function updateRoutinesUI(){
+  var elems=document.querySelectorAll('#hp-routines .hp-routine-item');
+  for(var i=0;i<elems.length&&i<_healthState.routines.length;i++){
+    var chk=elems[i].querySelector('input[type="checkbox"]');
+    if(chk)chk.checked=_healthState.routines[i].done;
+  }
+}
+
+function updateSupplementUI(){
+  var container=document.getElementById('hp-supp-grid');
+  if(!container)return;
+  var html='';
+  for(var i=0;i<_healthState.supplements.length;i++){
+    var s=_healthState.supplements[i];
+    var done=s.done?'opacity:0.5;':'';
+    html+='<div style="background:#111820;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px;text-align:center;display:flex;flex-direction:column;gap:6px;'+done+'"><div style="display:flex;gap:4px;justify-content:center;align-items:center;"><input type="checkbox" '+(done?'checked':'')+' onchange="toggleHealthItem(\'supplements\','+i+')" style="width:18px;height:18px;cursor:pointer;accent-color:#00e676;"><button onclick="deleteHealthItem(\'supplements\','+i+')" style="padding:2px 6px;background:#ff5a5a;color:#fff;border:none;border-radius:4px;font-size:9px;cursor:pointer;font-weight:600;transition:all 0.2s;pointer-events:auto;position:relative;z-index:5;" onmouseover="this.style.background=\'#ff3838\'" onmouseout="this.style.background=\'#ff5a5a\'">✕</button></div><div style="font-size:22px;">💊</div><div style="font-size:11px;font-weight:600;color:rgba(220,230,255,0.92);">'+s.name+'</div></div>';
+  }
+  container.innerHTML=html;
+}
+
+function updateExerciseUI(){
+  var container=document.getElementById('hp-ex-grid');
+  if(!container)return;
+  var html='';
+  for(var i=0;i<_healthState.exercises.length;i++){
+    var e=_healthState.exercises[i];
+    var done=e.done?'opacity:0.5;':'';
+    html+='<div style="background:#111820;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;'+done+'"><div style="display:flex;gap:4px;"><input type="checkbox" '+(done?'checked':'')+' onchange="toggleHealthItem(\'exercises\','+i+')" style="width:18px;height:18px;cursor:pointer;accent-color:#00e676;"><button onclick="deleteHealthItem(\'exercises\','+i+')" style="padding:2px 6px;background:#ff5a5a;color:#fff;border:none;border-radius:4px;font-size:9px;cursor:pointer;font-weight:600;transition:all 0.2s;pointer-events:auto;position:relative;z-index:5;" onmouseover="this.style.background=\'#ff3838\'" onmouseout="this.style.background=\'#ff5a5a\'">✕</button></div><div style="font-size:20px;">🏃</div><div style="font-size:11px;font-weight:600;color:rgba(220,230,255,0.92);">'+e.name+'</div></div>';
+  }
+  container.innerHTML=html;
+}
+
+function updateMealUI(){
+  for(var i=0;i<_healthState.meals.length;i++){
+    var chk=document.getElementById('meal-'+i);
+    if(chk)chk.checked=_healthState.meals[i].done;
+  }
+}
+
+function updateShoppingUI(){
+  var container=document.getElementById('shopping-list');
+  if(!container)return;
+  var html='';
+  for(var i=0;i<_healthState.shopping.length;i++){
+    var s=_healthState.shopping[i];
+    var done=s.done?'text-decoration:line-through;opacity:0.5;':'';
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#111820;border:1px solid rgba(255,255,255,0.07);border-radius:10px;"><input type="checkbox" '+(s.done?'checked':'')+' onchange="toggleShoppingItem('+i+')" style="width:18px;height:18px;cursor:pointer;accent-color:#00e676;"><span style="font-size:12px;color:rgba(220,230,255,0.92);flex:1;'+done+'">'+s.name+'</span><button onclick="deleteHealthItem(\'shopping\','+i+')" style="padding:4px 8px;background:#ff5a5a;color:#fff;border:none;border-radius:6px;font-size:10px;cursor:pointer;font-weight:600;transition:all 0.2s;pointer-events:auto;position:relative;z-index:5;flex-shrink:0;" onmouseover="this.style.background=\'#ff3838\'" onmouseout="this.style.background=\'#ff5a5a\'">Delete</button></div>';
+  }
+  container.innerHTML=html;
+}
+
+/* ═══ MEAL PLANNING ═══ */
+var _currentMealDay=1;
+var _mealPlan=JSON.parse(localStorage.getItem('zolaMealPlan'))||{
+  0:[],1:[{time:'06:00',name:'16:8',completed:false},{time:'11:00',name:'Hi-Protein',completed:false},{time:'15:00',name:'Hi-Fat',completed:false},{time:'18:00',name:'Complete',completed:false}],2:[],3:[],4:[],5:[],6:[]
+};
+
+function saveMealPlan(){
+  localStorage.setItem('zolaMealPlan',JSON.stringify(_mealPlan));
+}
+
+function selectMealDay(day){
+  _currentMealDay=day;
+  updateMealDayButtons();
+  renderMealSlots();
+}
+
+function updateMealDayButtons(){
+  var buttons=document.querySelectorAll('#meal-days-selector button');
+  buttons.forEach(function(btn,idx){
+    if(idx===_currentMealDay){
+      btn.style.background='rgba(255,179,0,0.15)';
+      btn.style.borderColor='rgba(255,179,0,0.40)';
+      btn.style.color='#ffb300';
+    }else{
+      btn.style.background='rgba(255,255,255,0.05)';
+      btn.style.borderColor='rgba(255,255,255,0.10)';
+      btn.style.color='rgba(150,160,180,0.80)';
+    }
+  });
+}
+
+function renderMealSlots(){
+  var container=document.getElementById('meal-slots-container');
+  if(!container)return;
+  var meals=_mealPlan[_currentMealDay]||[];
+  var html='';
+  for(var i=0;i<meals.length;i++){
+    var meal=meals[i];
+    var completed=meal.completed?'opacity:0.5;':'';
+    var strikethrough=meal.completed?'text-decoration:line-through;':'';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,179,0,0.15);border-radius:16px;gap:10px;'+completed+'"><input type="checkbox" '+( meal.completed?'checked':'')+' onchange="toggleMealCompletion('+i+')" style="width:18px;height:18px;cursor:pointer;flex-shrink:0;accent-color:#ffb300;"><div style="font-family:\'DM Mono\',monospace;font-size:14px;font-weight:600;color:rgba(150,160,180,0.90);'+strikethrough+'">'+meal.time+'</div><div style="flex:1;"></div><div style="display:flex;gap:6px;align-items:center;"><button onclick="deleteMealSlot('+i+')" style="padding:4px 8px;background:#ff5a5a;color:#fff;border:none;border-radius:6px;font-size:9px;cursor:pointer;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background=\'#ff3838\'" onmouseout="this.style.background=\'#ff5a5a\'">×</button><div style="padding:8px 14px;background:rgba(255,179,0,0.12);border:1.5px solid rgba(255,179,0,0.30);border-radius:20px;font-family:\'DM Sans\',sans-serif;font-size:11px;font-weight:700;color:#ffb300;'+strikethrough+'">'+meal.name+'</div></div></div>';
+  }
+  container.innerHTML=html||'<div style="text-align:center;padding:20px;color:rgba(150,160,180,0.60);font-size:12px;">No meals planned for this day</div>';
+}
+
+function openAddMeal(){
+  document.getElementById('add-meal-modal').classList.add('open');
+  document.getElementById('am-time').focus();
+}
+
+function closeAddMeal(e){
+  if(!e||e.target===document.getElementById('add-meal-modal')){
+    document.getElementById('add-meal-modal').classList.remove('open');
+    document.getElementById('am-time').value='';
+    document.getElementById('am-name').value='';
+  }
+}
+
+function saveAddMeal(){
+  var time=document.getElementById('am-time').value.trim();
+  var name=document.getElementById('am-name').value.trim();
+  
+  if(!time||!name){
+    showToast('Please enter time and meal name');
+    return;
+  }
+  
+  if(!_mealPlan[_currentMealDay])_mealPlan[_currentMealDay]=[];
+  _mealPlan[_currentMealDay].push({time:time,name:name,completed:false});
+  
+  saveMealPlan();
+  document.getElementById('add-meal-modal').classList.remove('open');
+  document.getElementById('am-time').value='';
+  document.getElementById('am-name').value='';
+  renderMealSlots();
+  showToast('✓ Meal added!');
+}
+
+function deleteMealSlot(idx){
+  if(_mealPlan[_currentMealDay]&&idx>=0&&idx<_mealPlan[_currentMealDay].length){
+    _mealPlan[_currentMealDay].splice(idx,1);
+    saveMealPlan();
+    renderMealSlots();
+    showToast('✓ Meal removed');
+  }
+}
+
+function toggleMealCompletion(idx){
+  if(_mealPlan[_currentMealDay]&&idx>=0&&idx<_mealPlan[_currentMealDay].length){
+    _mealPlan[_currentMealDay][idx].completed=!_mealPlan[_currentMealDay][idx].completed;
+    saveMealPlan();
+    renderMealSlots();
+  }
+}
+
+/* ═══ RECIPE STACK ═══ */
+var _recipes=JSON.parse(localStorage.getItem('zolaRecipes'))||[
+  {id:0,emoji:'🍗',name:'High-Protein Chicken Bowl',serves:2,time:25,calories:520,protein:48,ingredients:[{qty:'300g',name:'Chicken breast'},{qty:'1 cup',name:'Quinoa'},{qty:'2 tbsp',name:'Olive oil'},{qty:'1',name:'Avocado'},{qty:'Handful',name:'Spinach'},{qty:'1 tsp',name:'Turmeric'}],method:'Season chicken with turmeric. Cook quinoa. Pan-fry chicken in olive oil. Assemble bowl with spinach, quinoa, chicken, sliced avocado.',expanded:false}
+];
+
+function saveRecipes(){
+  localStorage.setItem('zolaRecipes',JSON.stringify(_recipes));
+}
+
+function toggleRecipeExpand(id){
+  var recipe=_recipes.find(r=>r.id===id);
+  if(recipe){
+    recipe.expanded=!recipe.expanded;
+    saveRecipes();
+    renderRecipes();
+  }
+}
+
+function renderRecipes(){
+  var container=document.getElementById('recipes-container');
+  if(!container)return;
+  var html='';
+  for(var i=0;i<_recipes.length;i++){
+    var r=_recipes[i];
+    var expanded=r.expanded?'':'display:none;';
+    html+='<div id="recipe-'+r.id+'" style="background:rgba(0,0,0,0.40);border:1px solid rgba(20,196,175,0.15);border-radius:18px;padding:16px;position:relative;"><div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;"><div style="display:flex;gap:10px;flex:1;"><div style="font-size:28px;">'+r.emoji+'</div><div style="flex:1;"><div style="font-family:\'Cinzel\',serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;">'+r.name+'</div><div style="font-family:\'DM Mono\',monospace;font-size:10px;color:rgba(150,160,180,0.80);">Serves '+r.serves+' · '+r.time+' min · '+r.calories+'kcal · '+r.protein+'g protein</div></div></div><button onclick="toggleRecipeExpand('+r.id+')" style="background:none;border:none;color:#14c4af;font-size:14px;cursor:pointer;transition:transform 0.3s;">'+(r.expanded?'▼':'▲')+'</button></div><div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;"><button onclick="addRecipeCalories('+r.id+')" style="padding:8px 12px;border-radius:16px;border:1.5px solid rgba(20,196,175,0.35);background:rgba(20,196,175,0.10);color:#14c4af;font-family:\'DM Mono\',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:4px;">🔥 '+r.calories+' kcal</button><button style="padding:8px 12px;border-radius:16px;border:1.5px solid rgba(255,179,0,0.35);background:rgba(255,179,0,0.10);color:#ffb300;font-family:\'DM Mono\',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:4px;">💪 '+r.protein+'g protein</button><button onclick="logMealRecipe('+r.id+')" style="padding:8px 12px;border-radius:16px;border:1.5px solid rgba(20,196,175,0.35);background:rgba(20,196,175,0.10);color:#14c4af;font-family:\'DM Sans\',sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ Log Meal</button></div><div id="recipe-content-'+r.id+'" style="'+expanded+'"><div style="margin-bottom:14px;padding-top:12px;border-top:1px solid rgba(20,196,175,0.15);"><div style="font-family:\'DM Mono\',monospace;font-size:8px;color:#14c4af;letter-spacing:0.2em;margin-bottom:10px;text-transform:uppercase;">// INGREDIENTS</div><div style="display:flex;flex-direction:column;gap:8px;">';
+    for(var j=0;j<r.ingredients.length;j++){
+      var ing=r.ingredients[j];
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(0,0,0,0.30);border-radius:12px;border:1px solid rgba(255,255,255,0.06);"><div style="display:flex;gap:8px;align-items:center;flex:1;"><div style="font-family:\'DM Mono\',monospace;font-size:10px;color:rgba(150,160,180,0.70);">'+ing.qty+'</div><div style="font-family:\'Cinzel\',serif;font-size:12px;color:rgba(220,230,255,0.90);">'+ing.name+'</div></div><button onclick="addToShoppingFromRecipe(\''+ing.name+'\')" style="padding:6px 10px;border-radius:12px;border:1.5px solid rgba(20,196,175,0.35);background:none;color:#14c4af;font-family:\'DM Sans\',sans-serif;font-size:9px;font-weight:700;cursor:pointer;transition:all 0.2s;">+ List</button></div>';
+    }
+    html+='</div></div><div style="padding-top:12px;border-top:1px solid rgba(20,196,175,0.15);"><div style="font-family:\'DM Mono\',monospace;font-size:8px;color:#14c4af;letter-spacing:0.2em;margin-bottom:10px;text-transform:uppercase;">// METHOD</div><div style="font-family:\'Cinzel\',serif;font-size:11px;color:rgba(220,230,255,0.80);line-height:1.6;">'+r.method+'</div></div></div></div>';
+  }
+  container.innerHTML=html;
+}
+
+function openAddRecipe(){
+  document.getElementById('add-recipe-modal').classList.add('open');
+  document.getElementById('ar-rname').focus();
+}
+
+function closeAddRecipe(e){
+  if(!e||e.target===document.getElementById('add-recipe-modal')){
+    document.getElementById('add-recipe-modal').classList.remove('open');
+  }
+}
+
+function saveAddRecipe(){
+  var name=document.getElementById('ar-rname').value.trim();
+  var emoji=document.getElementById('ar-emoji').value.trim()||'🍽️';
+  var serves=parseInt(document.getElementById('ar-serves').value)||1;
+  var time=parseInt(document.getElementById('ar-time').value)||30;
+  var calories=parseInt(document.getElementById('ar-cal').value)||300;
+  var protein=parseInt(document.getElementById('ar-protein').value)||20;
+  var method=document.getElementById('ar-method').value.trim()||'Cook and serve.';
+  
+  if(!name){
+    showToast('Please enter recipe name');
+    return;
+  }
+  
+  var newId=_recipes.length>0?Math.max(..._recipes.map(r=>r.id))+1:0;
+  _recipes.push({id:newId,emoji:emoji,name:name,serves:serves,time:time,calories:calories,protein:protein,ingredients:[],method:method,expanded:true});
+  
+  saveRecipes();
+  document.getElementById('add-recipe-modal').classList.remove('open');
+  document.getElementById('ar-rname').value='';
+  document.getElementById('ar-emoji').value='';
+  document.getElementById('ar-serves').value='';
+  document.getElementById('ar-time').value='';
+  document.getElementById('ar-cal').value='';
+  document.getElementById('ar-protein').value='';
+  document.getElementById('ar-method').value='';
+  renderRecipes();
+  showToast('✓ Recipe added!');
+}
+
+function addRecipeCalories(id){
+  var recipe=_recipes.find(r=>r.id===id);
+  if(recipe){
+    addCalories(recipe.calories);
+    showToast('✓ '+recipe.calories+' kcal added!');
+  }
+}
+
+function logMealRecipe(id){
+  var recipe=_recipes.find(r=>r.id===id);
+  if(recipe){
+    if(!_mealPlan[_currentMealDay])_mealPlan[_currentMealDay]=[];
+    var time=new Date().getHours().toString().padStart(2,'0')+':00';
+    _mealPlan[_currentMealDay].push({time:time,name:recipe.name,completed:false});
+    saveMealPlan();
+    showToast('✓ Meal logged!');
+  }
+}
+
+function addToShoppingFromRecipe(ingredient){
+  if(!_healthState.shopping)_healthState.shopping=[];
+  var exists=_healthState.shopping.some(s=>s.name.toLowerCase()===ingredient.toLowerCase());
+  if(exists){
+    showToast('Already in shopping list');
+    return;
+  }
+  _healthState.shopping.push({name:ingredient,done:false});
+  saveHealthState();
+  updateShoppingUI();
+  showToast('✓ Added to shopping list');
+}
+
+function filterRecipeByCalories(){
+  showToast('Filter by calories (coming soon)');
+}
+
+function initHealthRoutines(){
+  var routines=_healthState.routines||[{emoji:'💪',name:'Stretch',time:'7:00 AM'},{emoji:'🧘',name:'Meditate',time:'8:00 AM'},{emoji:'🏃',name:'Exercise',time:'6:00 PM'},{emoji:'😴',name:'Sleep',time:'10:00 PM'}];
+  var container=document.getElementById('hp-routines');
+  if(!container)return;
+  var html='';
+  for(var i=0;i<routines.length;i++){
+    var r=routines[i];
+    var done=_healthState.routines[i]&&_healthState.routines[i].done?'checked':'';
+    html+='<div class="hp-routine-item" style="display:flex;gap:10px;align-items:center;'+(done?'opacity:0.5;':'')+'"><input type="checkbox" '+done+' onchange="toggleHealthItem(\'routines\','+i+')" style="width:18px;height:18px;cursor:pointer;flex-shrink:0;accent-color:#00e676;"><div style="flex-shrink:0;font-size:20px;">'+r.emoji+'</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;color:rgba(220,230,255,0.92);'+(done?'text-decoration:line-through;':'')+'">'+r.name+'</div><div style="font-family:DM Mono,monospace;font-size:10px;color:#7a8fa8;margin-top:2px;">'+r.time+'</div></div><button onclick="deleteHealthItem(\'routines\','+i+')" style="padding:6px 8px;background:#ff5a5a;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;transition:all 0.2s;pointer-events:auto;position:relative;z-index:5;" onmouseover="this.style.background=\'#ff3838\'" onmouseout="this.style.background=\'#ff5a5a\'">Delete</button></div>';
+  }
+  container.innerHTML=html;
+}
+
+function deleteHealthItem(type,idx){
+  if(!_healthState[type]||idx<0||idx>=_healthState[type].length)return;
+  var itemName=_healthState[type][idx].name;
+  _healthState[type].splice(idx,1);
+  saveHealthState();
+  updateHealthUI();
+  initHealthRoutines();
+  updateSupplementUI();
+  updateExerciseUI();
+  updateMealUI();
+  updateShoppingUI();
+  showToast('✓ Deleted: '+itemName);
+}
+
+/* ═══ HEALTH TRACKING ═══ */
+var _waterCount=6;
+function updateWaterDisplay(){
+  var glassesContainer=document.getElementById('water-glasses');
+  if(!glassesContainer)return;
+  
+  glassesContainer.innerHTML='';
+  for(var i=0;i<8;i++){
+    var glassDiv=document.createElement('div');
+    glassDiv.style.cssText='font-size:20px;cursor:pointer;transition:all 0.2s;user-select:none;';
+    glassDiv.textContent=(i<_waterCount)?'🥛':'🥤';
+    glassDiv.title='Glass '+(i+1)+' - Click to toggle';
+    glassDiv.onclick=(function(idx){
+      return function(){
+        if(idx<_waterCount){
+          _waterCount--;
+        }else{
+          _waterCount++;
+        }
+        if(_waterCount>8)_waterCount=8;
+        if(_waterCount<0)_waterCount=0;
+        updateWaterDisplay();
+        var countEl=document.getElementById('water-count');
+        if(countEl)countEl.textContent=_waterCount;
+        showToast('💧 Water intake: '+_waterCount+'/8 glasses');
+      };
+    })(i);
+    glassDiv.onmouseover=function(){this.style.transform='scale(1.2)';};
+    glassDiv.onmouseout=function(){this.style.transform='scale(1)';};
+    glassesContainer.appendChild(glassDiv);
+  }
+}
+
+function addWater(){
+  if(_waterCount<8){
+    _waterCount++;
+    var countEl=document.getElementById('water-count');
+    if(countEl)countEl.textContent=_waterCount;
+    updateWaterDisplay();
+    showToast('💧 +1 Glass ('+_waterCount+'/8)');
+    if(_waterCount===8)showToast('💧 Daily goal reached! 🎉');
+  }else{
+    showToast('💧 Daily limit reached');
+  }
+}
+/* ═══ WELLNESS THERAPY TRACKS ═══ */
+var _therapyTracks=[
+  {name:'432hz Healing',     benefit:'🧘 Deep calm & stress release', freq:432, duration:300},
+  {name:'Ocean Waves',       benefit:'🌊 Anxiety relief', freq:40, duration:180},
+  {name:'Rain Meditation',   benefit:'🌧️ Focus & sleep', freq:10, duration:240},
+  {name:'Binaural Beats',    benefit:'🔔 Deep meditation', freq:8, duration:600},
+  {name:'Classical Serenity',benefit:'🎻 Mood elevation', freq:528, duration:280},
+  {name:'Drum Healing',      benefit:'🥁 Energy boost', freq:63, duration:220}
+];
+var _therapyIdx=0;
+var _therapyPlaying=false;
+var _therapyCtx=null;
+var _therapyGain=null;
+var _therapyOscs=[];
+var _therapyStartTime=0;
+var _therapyDuration=300;
+var _therapyProgressInterval=null;
+var _stressLevel='med';
+var _calorieCount=1245;
+
+function getTherapyContext(){
+  if(!_therapyCtx){
+    try{
+      var AudioContext=window.AudioContext||window.webkitAudioContext;
+      _therapyCtx=new AudioContext();
+    }catch(e){
+      console.log('Web Audio not available');
+    }
+  }
+  return _therapyCtx;
+}
+
+function updateTherapyProgress(){
+  try{
+    var progressBar=document.getElementById('th-progress-bar');
+    if(!progressBar)return;
+    
+    if(_therapyPlaying){
+      var ctx=getTherapyContext();
+      if(ctx){
+        var elapsed=ctx.currentTime-_therapyStartTime;
+        var percent=(elapsed/_therapyDuration)*100;
+        if(percent>100)percent=100;
+        progressBar.style.width=percent+'%';
+        
+        if(elapsed>=_therapyDuration){
+          stopTherapyFrequency();
+        }
+      }
+    }else{
+      progressBar.style.width='0%';
+    }
+  }catch(e){}
+}
+
+function playTherapyFrequency(freq){
+  var ctx=getTherapyContext();
+  if(!ctx)return false;
+  
+  try{
+    // Stop any existing oscillators
+    stopTherapyFrequency();
+    
+    var now=ctx.currentTime;
+    _therapyStartTime=now;
+    
+    // Create gain for volume control
+    if(!_therapyGain){
+      _therapyGain=ctx.createGain();
+      _therapyGain.connect(ctx.destination);
+    }
+    
+    _therapyGain.gain.setValueAtTime(0.15,now);
+    
+    var oscs=[];
+    
+    // For binaural beats (frequencies below 40 Hz), use oscillator pairs
+    if(freq<40){
+      var baseFreq=200;
+      var beatFreq=freq;
+      
+      var osc1=ctx.createOscillator();
+      var osc2=ctx.createOscillator();
+      
+      osc1.frequency.value=baseFreq;
+      osc2.frequency.value=baseFreq+beatFreq;
+      osc1.type='sine';
+      osc2.type='sine';
+      
+      osc1.connect(_therapyGain);
+      osc2.connect(_therapyGain);
+      
+      osc1.start(now);
+      osc2.start(now);
+      
+      oscs=[osc1,osc2];
+    }else{
+      // For higher frequencies, play multiple harmonics
+      var osc1=ctx.createOscillator();
+      var osc2=ctx.createOscillator();
+      var osc3=ctx.createOscillator();
+      
+      osc1.frequency.value=freq;
+      osc2.frequency.value=freq*2;
+      osc3.frequency.value=freq/2;
+      osc1.type='sine';
+      osc2.type='sine';
+      osc3.type='sine';
+      
+      osc1.connect(_therapyGain);
+      osc2.connect(_therapyGain);
+      osc3.connect(_therapyGain);
+      
+      osc1.start(now);
+      osc2.start(now);
+      osc3.start(now);
+      
+      oscs=[osc1,osc2,osc3];
+    }
+    
+    _therapyOscs=oscs;
+    
+    // Start progress tracking
+    if(_therapyProgressInterval)clearInterval(_therapyProgressInterval);
+    _therapyProgressInterval=setInterval(updateTherapyProgress,100);
+    
+    return true;
+  }catch(e){
+    console.log('Error playing frequency:',e);
+    _therapyOscs=[];
+    return false;
+  }
+}
+
+function stopTherapyFrequency(){
+  try{
+    if(_therapyOscs&&_therapyOscs.length>0){
+      for(var i=0;i<_therapyOscs.length;i++){
+        try{
+          _therapyOscs[i].stop();
+        }catch(e){}
+      }
+    }
+    _therapyOscs=[];
+    
+    if(_therapyProgressInterval){
+      clearInterval(_therapyProgressInterval);
+      _therapyProgressInterval=null;
+    }
+    
+    var progressBar=document.getElementById('th-progress-bar');
+    if(progressBar)progressBar.style.width='0%';
+  }catch(e){
+    _therapyOscs=[];
+  }
+}
+
+function selectTherapyTrack(idx){
+  if(idx<0||idx>=_therapyTracks.length)return;
+  _therapyIdx=idx;
+  _therapyPlaying=false;
+  stopTherapyFrequency();
+  var track=_therapyTracks[idx];
+  _therapyDuration=track.duration||300;
+  var titleEl=document.querySelector('.th-freq-title');
+  if(titleEl)titleEl.textContent=track.name+' ('+track.freq+' Hz)';
+  updateTherapyUI();
+  showToast('Selected: '+track.name);
+}
+
+function toggleTherapy(){
+  try{
+    var btn=document.getElementById('th-play-btn');
+    var track=_therapyTracks[_therapyIdx];
+    
+    if(_therapyPlaying){
+      stopTherapyFrequency();
+      _therapyPlaying=false;
+      if(btn)btn.textContent='▶';
+      showToast('⏸ Paused');
+    }else{
+      _therapyDuration=track.duration||300;
+      var success=playTherapyFrequency(track.freq);
+      if(success){
+        _therapyPlaying=true;
+        if(btn)btn.textContent='⏸';
+        showToast('▶ '+track.name+' ('+track.freq+' Hz)');
+      }else{
+        showToast('⚠ Audio unavailable');
+      }
+    }
+  }catch(e){
+    console.log('Therapy error:',e);
+    showToast('⚠ Playback error');
+  }
+}
+
+function updateTherapyUI(){
+  var buttons=document.querySelectorAll('.track-btn');
+  if(!buttons||buttons.length===0)return;
+  for(var i=0;i<Math.min(buttons.length,_therapyTracks.length);i++){
+    if(i===_therapyIdx){
+      buttons[i].style.background='rgba(139,92,246,0.10)';
+      buttons[i].style.borderColor='rgba(139,92,246,0.22)';
+    }else{
+      buttons[i].style.background='rgba(255,255,255,0.7)';
+      buttons[i].style.borderColor='rgba(0,0,0,0.08)';
+    }
+  }
+}
+
+function addWaterGlass(){
+  if(_waterCount<8){
+    _waterCount++;
+    document.getElementById('water-count').textContent=_waterCount;
+    showToast('💧 +1 Glass ('+_waterCount+'/8)');
+    if(_waterCount===8)showToast('💧 Daily goal reached!');
+  }else{
+    showToast('💧 Daily limit reached');
+  }
+}
+
+/* ═══ MOOD & STRESS SYNC ═══ */
+var _moodHistory=JSON.parse(localStorage.getItem('zola_mood_history'))||[];
+var _streakData=JSON.parse(localStorage.getItem('zola_streak_data'))||{lastDate:null, count:0};
+var _previousScore=72; // Track previous mood score for change detection
+
+function updateStreakByHearts(heartCount){
+  // Map heart count to stress level
+  // 5 hearts = low stress = 90% vitality
+  // 3-4 hearts = med stress = 60% vitality  
+  // 1-2 hearts = high stress = 30% vitality
+  
+  var stressLevel;
+  if(heartCount>=4){
+    stressLevel='low';
+  }else if(heartCount===3){
+    stressLevel='med';
+  }else{
+    stressLevel='high';
+  }
+  
+  // Trigger the full stress level update which syncs everything
+  setStressLevel(stressLevel);
+  
+  // Update heart display
+  for(var i=1;i<=5;i++){
+    var heartEl=document.getElementById('heart-'+i);
+    if(heartEl){
+      if(i<=heartCount){
+        heartEl.classList.remove('h-empty');
+        heartEl.classList.add('h-full');
+      }else{
+        heartEl.classList.remove('h-full');
+        heartEl.classList.add('h-empty');
+      }
+    }
+  }
+  
+  showToast('💖 Vitality updated! Streak: '+(_streakData.count||0)+' days 🔥');
+}
+
+function updateMoodThermometer(level){
+  var scoreEl=document.querySelector('.therm-score-num');
+  var statusEl=document.querySelector('.therm-card [style*="Happy"]');
+  var descEl=statusEl?statusEl.nextElementSibling:null;
+  
+  var score,emoji,status,desc;
+  
+  switch(level){
+    case 'low':
+      score=85;
+      emoji='😄';
+      status='Happy & Energized';
+      desc='You\'re feeling great today!';
+      break;
+    case 'med':
+      score=65;
+      emoji='😊';
+      status='Balanced & Content';
+      desc='You\'re in a good place today!';
+      break;
+    case 'high':
+      score=35;
+      emoji='😟';
+      status='Stressed & Overwhelmed';
+      desc='Take a moment to breathe. You\'ve got this!';
+      break;
+    default:
+      score=72;
+      emoji='😊';
+      status='Happy & Energized';
+      desc='You\'re feeling great today!';
+  }
+  
+  // Detect score change direction
+  var scoreChange=score-_previousScore;
+  var changeIndicator='';
+  var changeMsg='';
+  
+  if(scoreChange>0){
+    changeIndicator='📈';
+    changeMsg=' Improving! Great work!';
+  }else if(scoreChange<0){
+    changeIndicator='📉';
+    changeMsg=' Things are getting harder. Be kind to yourself.';
+  }
+  
+  // Update score color based on level
+  if(scoreEl){
+    scoreEl.textContent=score;
+    scoreEl.style.color=level==='high'?'#ff7a9a':(level==='low'?'#00e676':'#ffc107');
+  }
+  
+  var moodEmoji=document.querySelector('.therm-card div[style*="flex-direction"]>div:first-child');
+  if(moodEmoji)moodEmoji.textContent=emoji+' '+changeIndicator;
+  
+  var statusText=document.querySelector('.therm-card [style*="font-weight: 700; color: var(--t1)"]');
+  if(statusText)statusText.textContent=status;
+  
+  // Update description with change information
+  var descText=document.querySelector('.therm-card [style*="font-size: 11px"]');
+  if(descText){
+    if(scoreChange!==0){
+      descText.textContent=desc+changeMsg;
+    }else{
+      descText.textContent=desc;
+    }
+  }
+  
+  // Store current score as previous for next update
+  _previousScore=score;
+}
+
+function updateStreak(){
+  var today=new Date().toISOString().split('T')[0];
+  var lastDate=_streakData.lastDate;
+  var currentCount=_streakData.count||0;
+  
+  if(lastDate===today){
+    // Already checked in today
+    return;
+  }
+  
+  var yesterday=new Date();
+  yesterday.setDate(yesterday.getDate()-1);
+  var yesterdayStr=yesterday.toISOString().split('T')[0];
+  
+  if(lastDate===yesterdayStr){
+    // Streak continues
+    currentCount++;
+  }else if(lastDate!==today){
+    // New streak or gap
+    currentCount=1;
+  }
+  
+  _streakData.lastDate=today;
+  _streakData.count=currentCount;
+  localStorage.setItem('zola_streak_data',JSON.stringify(_streakData));
+  
+  return currentCount;
+}
+
+function updateStreakDisplay(){
+  var count=_streakData.count||0;
+  var streakEl=document.querySelector('.fire-badge');
+  if(streakEl){
+    streakEl.textContent='🔥 '+count+'-day streak';
+  }
+  
+  // Update joy percentage based on stress level
+  var joyPercent=0;
+  switch(_stressLevel){
+    case 'low': joyPercent=90; break;
+    case 'med': joyPercent=60; break;
+    case 'high': joyPercent=30; break;
+    default: joyPercent=45;
+  }
+  
+  var joyPctEl=document.getElementById('joy-pct');
+  var joyFillEl=document.getElementById('joy-fill');
+  if(joyPctEl)joyPctEl.textContent=joyPercent+'%';
+  if(joyFillEl)joyFillEl.style.width=joyPercent+'%';
+  
+  // Update hearts display
+  var heartsCount=Math.ceil((joyPercent/100)*5);
+  var heartContainer=document.querySelector('.res-card div[style*="display:flex; align-items: center; gap: 6px"]');
+  if(heartContainer){
+    var hearts=heartContainer.querySelectorAll('div[class*="h-"]');
+    for(var i=0;i<hearts.length;i++){
+      if(i<heartsCount){
+        hearts[i].classList.remove('h-empty');
+        hearts[i].classList.add('h-full');
+      }else{
+        hearts[i].classList.remove('h-full');
+        hearts[i].classList.add('h-empty');
+      }
+    }
+  }
+}
+
+function setStressLevel(level){
+  _stressLevel=level;
+  
+  // Update button styles
+  var stressLow=document.getElementById('stress-low');
+  var stressMed=document.getElementById('stress-med');
+  var stressHigh=document.getElementById('stress-high');
+  
+  if(stressLow)stressLow.style.background=level==='low'?'rgba(232,84,122,0.25)':'rgba(232,84,122,0.10)';
+  if(stressMed)stressMed.style.background=level==='med'?'rgba(196,152,32,0.25)':'rgba(196,152,32,0.10)';
+  if(stressHigh)stressHigh.style.background=level==='high'?'rgba(232,84,122,0.35)':'rgba(232,84,122,0.20)';
+  
+  // Update mood thermometer
+  updateMoodThermometer(level);
+  
+  // Update streak
+  var newStreak=updateStreak();
+  updateStreakDisplay();
+  
+  // Log to history
+  var entry={
+    date: new Date().toISOString(),
+    stress: level,
+    streak: newStreak
+  };
+  _moodHistory.push(entry);
+  localStorage.setItem('zola_mood_history',JSON.stringify(_moodHistory));
+  
+  showToast('😊 Mood updated! Streak: '+(_streakData.count||0)+' days 🔥');
+}
+
+function setMood(mood){
+  // Map mood to stress level
+  var stressLevel;
+  switch(mood){
+    case 'calm': stressLevel='low'; break;
+    case 'neutral': stressLevel='med'; break;
+    case 'stressed': stressLevel='high'; break;
+    default: stressLevel='med';
+  }
+  
+  // Update the stress level which will trigger all sync
+  setStressLevel(stressLevel);
+  
+  // Highlight the selected mood button
+  var moodBtns=document.querySelectorAll('.mood-btn');
+  for(var i=0;i<moodBtns.length;i++){
+    moodBtns[i].style.transform='scale(1)';
+    moodBtns[i].style.opacity='0.7';
+  }
+  
+  var selectedBtn=document.getElementById('mood-'+mood);
+  if(selectedBtn){
+    selectedBtn.style.transform='scale(1.05)';
+    selectedBtn.style.opacity='1';
+  }
+}
+
+function addCalories(amount){
+  _calorieCount+=amount;
+  var maxCal=2400;
+  if(_calorieCount>maxCal)_calorieCount=maxCal;
+  var pct=Math.round((_calorieCount/maxCal)*100);
+  var remaining=maxCal-_calorieCount;
+  
+  var countEl=document.getElementById('hp-cal-today-val');
+  if(countEl)countEl.textContent=_calorieCount+' / '+maxCal+' kcal';
+  
+  var fillEl=document.getElementById('hp-cal-fill');
+  if(fillEl)fillEl.style.width=pct+'%';
+  
+  var remainEl=document.getElementById('hp-cal-remain');
+  if(remainEl)remainEl.textContent=remaining+' kcal';
+  
+  showToast('+'+amount+' kcal → '+_calorieCount);
+}
+
+function openAddRoutine(){
+  document.getElementById('add-routine-modal').classList.add('open');
+  document.getElementById('ar-name').focus();
+}
+
+function closeAddRoutine(e){
+  if(!e||e.target===document.getElementById('add-routine-modal')){
+    document.getElementById('add-routine-modal').classList.remove('open');
+    document.getElementById('ar-name').value='';
+    document.getElementById('ar-emoji').value='';
+    document.getElementById('ar-time').value='';
+  }
+}
+
+function saveAddRoutine(){
+  var name=document.getElementById('ar-name').value.trim();
+  var emoji=document.getElementById('ar-emoji').value.trim()||'✓';
+  var time=document.getElementById('ar-time').value.trim()||'12:00 PM';
+  
+  if(!name){
+    showToast('Please enter a routine name');
+    return;
+  }
+  
+  if(!_healthState.routines)_healthState.routines=[];
+  _healthState.routines.push({name:name,emoji:emoji,time:time,done:false});
+  
+  saveHealthState();
+  document.getElementById('add-routine-modal').classList.remove('open');
+  document.getElementById('ar-name').value='';
+  document.getElementById('ar-emoji').value='';
+  document.getElementById('ar-time').value='';
+  updateRoutinesUI();
+  showToast('✓ Routine added!');
+}
+
+/* ═══ EXPORT ═══ */
+function openExportSheet(){
+  document.getElementById('export-sheet').classList.add('open');
+}
+function closeExportSheet(e){
+  if(!e||e.target===document.getElementById('export-sheet')){
+    document.getElementById('export-sheet').classList.remove('open');
+  }
+}
+function doShare(){
+  var text='Zola App - Spirit Centre & Wellness\n\nVerse: '+VERSES[_vi].t+'\n'+VERSES[_vi].r+'\n\nKeep the faith & take care!';
+  if(navigator.share){
+    navigator.share({title:'Zola App',text:text}).catch(function(){});
+  }else{
+    if(navigator.clipboard)navigator.clipboard.writeText(text);
+    showToast('Copied! 📋');
+  }
+}
+function doSave(){
+  var text='ZOLA APP\n\nVERSE OF THE DAY\n'+VERSES[_vi].t+'\n'+VERSES[_vi].r+'\n\nREADING PROGRESS\nDay '+(_rp.day||1)+' / 30\n'+_rp.completed.length+' days complete\n\nPRAYERS: '+_prayers.length+'\nGRATITUDE ENTRIES: '+_gratEntries.length+'\n\n— Keep growing in faith and wellness';
+  var a=document.createElement('a');
+  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(text);
+  a.download='Zola_'+new Date().toISOString().slice(0,10)+'.txt';
+  a.click();
+  showToast('Saved! 💾');
+}
+
+/* ═══ SCREENSHOT ═══ */
+function _buildScreenshotPage(title,icon,accent,contentHtml,footerNote){
+  var date=new Date().toDateString();
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+title+'</title>'
+    +'<style>*{margin:0;padding:0;box-sizing:border-box;}'
+    +'body{font-family:"Segoe UI",Arial,sans-serif;background:#f8f4ff;padding:32px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
+    +'@media print{body{padding:16px;}@page{size:A4;margin:14mm;}}'
+    +'.card{max-width:700px;margin:0 auto;background:#fff;border-radius:18px;box-shadow:0 4px 32px rgba(0,0,0,0.08);overflow:hidden;}'
+    +'.hdr{background:linear-gradient(135deg,'+accent+' 0%,'+accent+'cc 100%);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;}'
+    +'.hdr-left .app{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:4px;}'
+    +'.hdr-left .title{font-size:22px;font-weight:800;color:#fff;}'
+    +'.hdr-left .date{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}'
+    +'.hdr-icon{font-size:40px;opacity:0.9;}'
+    +'.body{padding:24px 28px;}'
+    +'.footer{padding:12px 28px;background:#f8f4ff;border-top:1px solid #eee;font-size:9px;color:#aaa;text-align:center;letter-spacing:0.5px;}'
+    +'</style></head><body>'
+    +'<div class="card">'
+    +'<div class="hdr"><div class="hdr-left"><div class="app">Zola App</div><div class="title">'+icon+' '+title+'</div><div class="date">'+date+'</div></div><div class="hdr-icon">'+icon+'</div></div>'
+    +'<div class="body">'+contentHtml+'</div>'
+    +'<div class="footer">'+(footerNote||'Generated by Zola App · '+title)+'</div>'
+    +'</div></body></html>';
+}
+
+function _openScreenshot(html,toastMsg){
+  var w=window.open('','_blank','width=780,height=980');
+  if(!w){showToast('Allow popups to use Screenshot');return;}
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){w.print();},400);
+  showToast(toastMsg||'Screenshot ready 📸');
+}
+
+function doScreenshot(){
+  var activeTab=document.querySelector('[id^="screen-"]');
+  if(document.getElementById('screen-wellness').style.display!=='none'){
+    wellnessScreenshot();
+  }else{
+    spiritScreenshot();
+  }
+}
+
+function spiritScreenshot(){
+  var verse=VERSES[_vi];
+  var html='<h2 style="font-size:18px;color:#333;margin-bottom:16px;">'+verse.t+'</h2>'
+    +'<p style="font-size:14px;line-height:1.8;color:#666;margin-bottom:16px;">'+verse.r+'</p>'
+    +'<div style="margin-top:24px;padding-top:16px;border-top:1px solid #eee;">'
+    +'<p style="font-size:12px;color:#999;">Reading Progress: Day '+(_rp.day||1)+' / 30</p>'
+    +'<p style="font-size:12px;color:#999;">Days Completed: '+_rp.completed.length+'</p>'
+    +'</div>';
+  _openScreenshot(_buildScreenshotPage('Daily Reading','🙏','#7C3AED',html,'Your Daily Scripture · Keep the faith & grow!'),'Spirit reading screenshot ready 🙏');
+}
+
+function wellnessScreenshot(){
+  var stressText='Unknown';
+  switch(_stressLevel){
+    case 'low': stressText='Low - Relaxed & Happy'; break;
+    case 'med': stressText='Medium - Balanced & Content'; break;
+    case 'high': stressText='High - Stressed & Overwhelmed'; break;
+  }
+  
+  var html='<div style="margin-bottom:24px;">'
+    +'<h3 style="font-size:14px;font-weight:700;margin-bottom:8px;color:#333;">Today\'s Wellness Status</h3>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+    +'<div style="padding:12px;background:#f0f0f0;border-radius:8px;"><strong style="font-size:12px;color:#666;">Stress Level</strong><br><span style="font-size:16px;color:#7C3AED;font-weight:700;">'+stressText+'</span></div>'
+    +'<div style="padding:12px;background:#f0f0f0;border-radius:8px;"><strong style="font-size:12px;color:#666;">Water Intake</strong><br><span style="font-size:16px;color:#3b8ee8;font-weight:700;">'+_waterCount+' / 8 glasses</span></div>'
+    +'<div style="padding:12px;background:#f0f0f0;border-radius:8px;"><strong style="font-size:12px;color:#666;">Mood Streak</strong><br><span style="font-size:16px;color:#ff7a9a;font-weight:700;">'+(_streakData.count||0)+' days 🔥</span></div>'
+    +'<div style="padding:12px;background:#f0f0f0;border-radius:8px;"><strong style="font-size:12px;color:#666;">Vitality</strong><br><span style="font-size:16px;color:#00e676;font-weight:700;">'+document.getElementById("joy-pct").textContent+'</span></div>'
+    +'</div>'
+    +'</div>'
+    +'<div style="padding:16px;background:#e8f5e9;border-left:4px solid #00e676;border-radius:4px;">'
+    +'<p style="font-size:12px;color:#333;"><strong>💡 Wellness Tip:</strong> Keep tracking your daily mood and stress levels to build a sustainable wellness routine. Every check-in counts!</p>'
+    +'</div>';
+  _openScreenshot(_buildScreenshotPage('Daily Wellness Report','💚','#15A854',html,'Your Daily Wellness Summary · Stay healthy, stay happy!'),'Wellness screenshot ready 💚');
+}
+
+/* ═══ TOAST ═══ */
+var _tt=null;
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.remove('show');
+  void t.offsetWidth;
+  t.classList.add('show');
+  clearTimeout(_tt);
+  _tt=setTimeout(function(){t.classList.remove('show');},2800);
+}
+function dismissToast(){
+  document.getElementById('toast').classList.remove('show');
+  clearTimeout(_tt);
+}
+
+/* ═══ ADD ITEM STUBS ═══ */
+function openAddItem(){
+  document.getElementById('add-shopping-modal').classList.add('open');
+  document.getElementById('ash-item').focus();
+}
+
+function closeAddShopping(e){
+  if(!e||e.target===document.getElementById('add-shopping-modal')){
+    document.getElementById('add-shopping-modal').classList.remove('open');
+    document.getElementById('ash-item').value='';
+  }
+}
+
+function saveAddShopping(){
+  var item=document.getElementById('ash-item').value.trim();
+  
+  if(!item){
+    showToast('Please enter an item name');
+    return;
+  }
+  
+  if(!_healthState.shopping)_healthState.shopping=[];
+  _healthState.shopping.push({name:item,done:false});
+  
+  saveHealthState();
+  document.getElementById('add-shopping-modal').classList.remove('open');
+  document.getElementById('ash-item').value='';
+  updateShoppingUI();
+  showToast('✓ Item added!');
+}
+
+function openAddSupplement(){
+  document.getElementById('add-supplement-modal').classList.add('open');
+  document.getElementById('as-name').focus();
+}
+
+function closeAddSupplement(e){
+  if(!e||e.target===document.getElementById('add-supplement-modal')){
+    document.getElementById('add-supplement-modal').classList.remove('open');
+    document.getElementById('as-name').value='';
+  }
+}
+
+function saveAddSupplement(){
+  var name=document.getElementById('as-name').value.trim();
+  
+  if(!name){
+    showToast('Please enter a supplement name');
+    return;
+  }
+  
+  if(!_healthState.supplements)_healthState.supplements=[];
+  _healthState.supplements.push({name:name,done:false});
+  
+  saveHealthState();
+  document.getElementById('add-supplement-modal').classList.remove('open');
+  document.getElementById('as-name').value='';
+  updateSupplementUI();
+  showToast('✓ Supplement added!');
+}
+
+function openAddExercise(){
+  document.getElementById('add-workout-modal').classList.add('open');
+  document.getElementById('aw-name').focus();
+}
+
+function closeAddWorkout(e){
+  if(!e||e.target===document.getElementById('add-workout-modal')){
+    document.getElementById('add-workout-modal').classList.remove('open');
+    document.getElementById('aw-name').value='';
+    document.getElementById('aw-duration').value='';
+  }
+}
+
+function saveAddWorkout(){
+  var name=document.getElementById('aw-name').value.trim();
+  var duration=document.getElementById('aw-duration').value.trim()||'30';
+  
+  if(!name){
+    showToast('Please enter a workout name');
+    return;
+  }
+  
+  if(!_healthState.exercises)_healthState.exercises=[];
+  _healthState.exercises.push({name:name,duration:duration,done:false});
+  
+  saveHealthState();
+  document.getElementById('add-workout-modal').classList.remove('open');
+  document.getElementById('aw-name').value='';
+  document.getElementById('aw-duration').value='';
+  updateExerciseUI();
+  showToast('✓ Workout added!');
+}
+
+/* ═══ 7-DAY PLANNER ═══ */
+var _plannerCurrentDay=1;
+var _plannerTasks=JSON.parse(localStorage.getItem('zolaPlannerTasks'))||{
+  0:[],1:[{id:0,time:'07:00',emoji:'☀️',name:'Rise & Sunlight',priority:'Med',done:false}],2:[],3:[],4:[],5:[],6:[]
+};
+var _plannerTaskIdCounter=1;
+var _currentTaskPriority='Med';
+
+function savePlannerData(){
+  localStorage.setItem('zolaPlannerTasks',JSON.stringify(_plannerTasks));
+}
+
+function selectPlannerDay(day){
+  _plannerCurrentDay=day;
+  updatePlannerDayHighlight();
+  renderPlannerTasks();
+}
+
+function updatePlannerDayHighlight(){
+  for(var i=0;i<7;i++){
+    var dayEl=document.getElementById('planner-day-'+i);
+    if(dayEl){
+      if(i===_plannerCurrentDay){
+        dayEl.style.background='#1e5ba8';
+        dayEl.style.color='#fff';
+      }else{
+        dayEl.style.background='transparent';
+        dayEl.style.color='#1a2a3a';
+      }
+    }
+  }
+}
+
+function setTaskPriority(priority){
+  _currentTaskPriority=priority;
+  var buttons=document.querySelectorAll('[onclick*="setTaskPriority"]');
+  buttons.forEach(function(btn){
+    btn.style.borderColor='rgba(100,120,160,0.25)';
+    btn.style.color='rgba(100,120,160,0.70)';
+    btn.style.borderWidth='1.5px';
+  });
+  var selectedBtn=document.querySelector('[onclick*="\''+priority+'\'"]');
+  if(selectedBtn){
+    selectedBtn.style.borderColor='#1e5ba8';
+    selectedBtn.style.color='#1e5ba8';
+    selectedBtn.style.borderWidth='2px';
+  }
+}
+
+function addPlannerTask(){
+  var input=document.getElementById('task-input');
+  var timeInput=document.getElementById('task-time');
+  var taskName=input.value.trim();
+  var taskTime=timeInput.value||'09:00';
+  
+  if(!taskName){
+    showToast('Please enter a task name');
+    return;
+  }
+  
+  if(!_plannerTasks[_plannerCurrentDay])_plannerTasks[_plannerCurrentDay]=[];
+  
+  _plannerTasks[_plannerCurrentDay].push({
+    id:_plannerTaskIdCounter++,
+    time:taskTime,
+    emoji:'',
+    name:taskName,
+    priority:_currentTaskPriority,
+    done:false
+  });
+  
+  savePlannerData();
+  input.value='';
+  timeInput.value='09:00';
+  _currentTaskPriority='Med';
+  renderPlannerTasks();
+  showToast('✓ Task added!');
+}
+
+function renderPlannerTasks(){
+  var container=document.getElementById('planner-tasks-container');
+  if(!container)return;
+  
+  var tasks=_plannerTasks[_plannerCurrentDay]||[];
+  var html='';
+  
+  for(var i=0;i<tasks.length;i++){
+    var task=tasks[i];
+    var priorityColor='#9ca3af';
+    var priorityBg='#f3f4f6';
+    
+    if(task.priority==='High'){
+      priorityColor='#ef4444';
+      priorityBg='rgba(239,68,68,0.10)';
+    }else if(task.priority==='Med'){
+      priorityColor='#d97706';
+      priorityBg='rgba(217,119,6,0.10)';
+    }else if(task.priority==='Low'){
+      priorityColor='#8b5cf6';
+      priorityBg='rgba(139,92,246,0.10)';
+    }
+    
+    var doneStyle=task.done?'opacity:0.5;text-decoration:line-through;':'';
+    var circleStyle=task.done?'background:#1e5ba8;border-color:#1e5ba8;':'border:2px solid #1e5ba8;background:transparent;';
+    
+    html+='<div style="background:#fff;border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);"><div style="width:24px;height:24px;border-radius:50%;'+circleStyle+'cursor:pointer;flex-shrink:0;" onclick="togglePlannerTaskDone('+task.id+')"></div><div style="font-size:18px;">'+task.emoji+'</div><div style="flex:1;"><div style="font-family:\'Syne\',sans-serif;font-size:14px;font-weight:700;color:#1a2a3a;'+doneStyle+'">'+task.name+'</div><div style="font-family:\'DM Mono\',monospace;font-size:11px;color:rgba(100,120,160,0.60);margin-top:2px;">'+task.time+'</div></div><button style="padding:6px 10px;border-radius:10px;border:none;background:'+priorityBg+';color:'+priorityColor+';font-family:\'DM Sans\',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">'+task.priority+'</button><button onclick="deletePlannerTask('+task.id+')" style="padding:8px 10px;border-radius:12px;border:1.5px solid rgba(236,72,153,0.30);background:rgba(236,72,153,0.08);color:#f43f5e;font-size:16px;cursor:pointer;border:none;">×</button></div>';
+  }
+  
+  container.innerHTML=html||'<div style="text-align:center;padding:30px;color:rgba(100,120,160,0.60);font-size:14px;">No tasks yet. Add one above!</div>';
+}
+
+function togglePlannerTaskDone(id){
+  var task=_plannerTasks[_plannerCurrentDay].find(t=>t.id===id);
+  if(task){
+    task.done=!task.done;
+    savePlannerData();
+    renderPlannerTasks();
+  }
+}
+
+function deletePlannerTask(id){
+  if(_plannerTasks[_plannerCurrentDay]){
+    var idx=_plannerTasks[_plannerCurrentDay].findIndex(t=>t.id===id);
+    if(idx>=0){
+      _plannerTasks[_plannerCurrentDay].splice(idx,1);
+      savePlannerData();
+      renderPlannerTasks();
+      showToast('✓ Task deleted');
+    }
+  }
+}
+
+function renderPlannerSlots(){
+  var container=document.getElementById('slots-container');
+  if(!container)return;
+  container.innerHTML='';
+  var daySlots=_plannerData.days[_plannerCurrentDay]||[];
+  
+  daySlots.forEach(function(slot,idx){
+    var slotEl=document.createElement('div');
+    slotEl.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:14px;border:1px solid rgba(123,79,212,0.16);background:rgba(123,79,212,0.06);backdrop-filter:blur(2px);';
+    
+    var timeEl=document.createElement('span');
+    timeEl.textContent=slot.time;
+    timeEl.style.cssText='color:rgba(200,190,255,0.55);font-size:12px;font-weight:500;min-width:55px;font-family:"DM Mono",monospace;';
+    
+    var labelContainer=document.createElement('div');
+    labelContainer.style.cssText='display:flex;align-items:center;gap:8px;flex:1;margin-left:16px;';
+    
+    var labelInput=document.createElement('input');
+    labelInput.type='text';
+    labelInput.value=slot.label;
+    labelInput.style.cssText='flex:1;border:none;background:transparent;color:var(--sp2);font-weight:600;font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid rgba(167,139,250,0.30);text-align:right;outline:none;font-family:"DM Sans",sans-serif;';
+    labelInput.onchange=function(){
+      slot.label=labelInput.value;
+      savePlannerData();
+    };
+    
+    var deleteBtn=document.createElement('button');
+    deleteBtn.textContent='×';
+    deleteBtn.style.cssText='border:none;background:transparent;color:rgba(167,139,250,0.50);font-size:18px;cursor:pointer;padding:0;width:20px;height:20px;font-family:"DM Sans",sans-serif;';
+    deleteBtn.onclick=function(){
+      daySlots.splice(idx,1);
+      savePlannerData();
+      renderPlannerSlots();
+    };
+    
+    labelContainer.appendChild(labelInput);
+    labelContainer.appendChild(deleteBtn);
+    slotEl.appendChild(timeEl);
+    slotEl.appendChild(labelContainer);
+    container.appendChild(slotEl);
+  });
+}
+
+function updatePlannerDisplay(){
+  var dayBtns=document.querySelectorAll('.day-btn');
+  dayBtns.forEach(function(btn,idx){
+    if(idx===_plannerCurrentDay){
+      btn.style.borderColor='var(--sp2)';
+      btn.style.color='var(--sp2)';
+      btn.style.background='rgba(167,139,250,0.12)';
+      btn.innerHTML=btn.textContent.split('<')[0]+'<br><span style="font-size:8px;color:var(--sp2);">●</span>';
+    }else{
+      btn.style.borderColor='rgba(123,79,212,0.30)';
+      btn.style.color='rgba(200,190,255,0.55)';
+      btn.style.background='transparent';
+      btn.textContent=btn.textContent.split('<')[0];
+    }
+  });
+  renderPlannerSlots();
+}
+
+function setupPlannerListeners(){
+  var dayBtns=document.querySelectorAll('.day-btn');
+  dayBtns.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      _plannerCurrentDay=parseInt(this.dataset.day);
+      updatePlannerDisplay();
+    });
+  });
+  
+  var addBtn=document.getElementById('add-slot-btn');
+  if(addBtn){
+    addBtn.addEventListener('click',function(){
+      if(!_plannerData.days[_plannerCurrentDay]){
+        _plannerData.days[_plannerCurrentDay]=[];
+      }
+      var hour=6+(Math.floor(_plannerData.days[_plannerCurrentDay].length));
+      var newTime=String(hour).padStart(2,'0')+':00';
+      _plannerData.days[_plannerCurrentDay].push({time:newTime,label:'New Task'});
+      savePlannerData();
+      renderPlannerSlots();
+      showToast('✓ Time slot added');
+    });
+  }
+}
+
+/* ═══ INIT ═══ */
+loadHealthState();
+initHealthRoutines();
+updateHealthUI();
+updateMealDayButtons();
+renderMealSlots();
+renderRecipes();
+setTimeout(function(){
+  updateSupplementUI();
+  updateExerciseUI();
+  updateShoppingUI();
+},100);
+
+// Initialize streak display on load
+setTimeout(function(){
+  updateStreakDisplay();
+  updateMoodThermometer(_stressLevel);
+  updateWaterDisplay();
+},200);
+
+// Initialize event listeners
+document.addEventListener('DOMContentLoaded',function(){
+  // Stress level buttons
+  var stressLowBtn=document.getElementById('stress-low');
+  var stressMedBtn=document.getElementById('stress-med');
+  var stressHighBtn=document.getElementById('stress-high');
+  
+  if(stressLowBtn)stressLowBtn.addEventListener('click',function(){setStressLevel('low');});
+  if(stressMedBtn)stressMedBtn.addEventListener('click',function(){setStressLevel('med');});
+  if(stressHighBtn)stressHighBtn.addEventListener('click',function(){setStressLevel('high');});
+  
+  // Mood buttons
+  var moodCalmBtn=document.getElementById('mood-calm');
+  var moodNeutralBtn=document.getElementById('mood-neutral');
+  var moodStressedBtn=document.getElementById('mood-stressed');
+  
+  if(moodCalmBtn)moodCalmBtn.addEventListener('click',function(){setMood('calm');});
+  if(moodNeutralBtn)moodNeutralBtn.addEventListener('click',function(){setMood('neutral');});
+  if(moodStressedBtn)moodStressedBtn.addEventListener('click',function(){setMood('stressed');});
+  
+  // Therapy play button
+  var playBtn=document.getElementById('th-play-btn');
+  if(playBtn)playBtn.addEventListener('click',toggleTherapy);
+  
+  // Therapy frequency buttons
+  var trackBtns=document.querySelectorAll('.track-btn');
+  for(var i=0;i<trackBtns.length;i++){
+    (function(idx){
+      trackBtns[idx].addEventListener('click',function(){selectTherapyTrack(idx);});
+    })(i);
+  }
+  
+  // Add glass button
+  var addGlassBtn=document.getElementById('add-glass-btn');
+  if(addGlassBtn)addGlassBtn.addEventListener('click',addWater);
+  
+  // Add prayer button
+  var addPrayerBtn=document.querySelector('.sp-add-prayer-btn');
+  if(addPrayerBtn)addPrayerBtn.addEventListener('click',function(){
+    if(!_prayerData)_prayerData=[];
+    _prayerData.push({text:'New Prayer',prayed:false});
+    savePrayerData();
+    renderPrayers();
+    showToast('✓ Prayer added');
+  });
+  
+  // Add supplement button
+  var addSupplementBtn=document.getElementById('add-supplement-btn');
+  if(addSupplementBtn)addSupplementBtn.addEventListener('click',function(){
+    if(!_supplementData)_supplementData=[];
+    _supplementData.push({name:'New Supplement',taken:false});
+    saveSupplementData();
+    renderSupplements();
+    showToast('✓ Supplement added');
+  });
+  
+  // Add exercise button
+  var addExerciseBtn=document.getElementById('add-exercise-btn');
+  if(addExerciseBtn)addExerciseBtn.addEventListener('click',function(){
+    if(!_exerciseData)_exerciseData=[];
+    _exerciseData.push({name:'New Exercise',completed:false,duration:'30'});
+    saveExerciseData();
+    renderExercises();
+    showToast('✓ Exercise added');
+  });
+  
+  // Add shopping item button
+  var addItemBtn=document.getElementById('add-item-btn');
+  if(addItemBtn)addItemBtn.addEventListener('click',function(){
+    if(!_shoppingData)_shoppingData=[];
+    _shoppingData.push({item:'New Item',checked:false});
+    saveShoppingData();
+    renderShoppingItems();
+    showToast('✓ Item added to shopping list');
+  });
+});
+
+// Fallback if DOM already loaded
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',function(){});
+}else{
+  setTimeout(function(){
+    var stressLowBtn=document.getElementById('stress-low');
+    var stressMedBtn=document.getElementById('stress-med');
+    var stressHighBtn=document.getElementById('stress-high');
+    
+    if(stressLowBtn)stressLowBtn.addEventListener('click',function(){setStressLevel('low');});
+    if(stressMedBtn)stressMedBtn.addEventListener('click',function(){setStressLevel('med');});
+    if(stressHighBtn)stressHighBtn.addEventListener('click',function(){setStressLevel('high');});
+    
+    var moodCalmBtn=document.getElementById('mood-calm');
+    var moodNeutralBtn=document.getElementById('mood-neutral');
+    var moodStressedBtn=document.getElementById('mood-stressed');
+    
+    if(moodCalmBtn)moodCalmBtn.addEventListener('click',function(){setMood('calm');});
+    if(moodNeutralBtn)moodNeutralBtn.addEventListener('click',function(){setMood('neutral');});
+    if(moodStressedBtn)moodStressedBtn.addEventListener('click',function(){setMood('stressed');});
+    
+    var playBtn=document.getElementById('th-play-btn');
+    if(playBtn)playBtn.addEventListener('click',toggleTherapy);
+    
+    var trackBtns=document.querySelectorAll('.track-btn');
+    for(var i=0;i<trackBtns.length;i++){
+      (function(idx){
+        trackBtns[idx].addEventListener('click',function(){selectTherapyTrack(idx);});
+      })(i);
+    }
+    
+    var addGlassBtn=document.getElementById('add-glass-btn');
+    if(addGlassBtn)addGlassBtn.addEventListener('click',addWater);
+    
+    // Add prayer button
+    var addPrayerBtn=document.querySelector('.sp-add-prayer-btn');
+    if(addPrayerBtn)addPrayerBtn.addEventListener('click',function(){
+      if(!_prayerData)_prayerData=[];
+      _prayerData.push({text:'New Prayer',prayed:false});
+      savePrayerData();
+      renderPrayers();
+      showToast('✓ Prayer added');
+    });
+    
+    // Add supplement button
+    var addSupplementBtn=document.getElementById('add-supplement-btn');
+    if(addSupplementBtn)addSupplementBtn.addEventListener('click',function(){
+      if(!_supplementData)_supplementData=[];
+      _supplementData.push({name:'New Supplement',taken:false});
+      saveSupplementData();
+      renderSupplements();
+      showToast('✓ Supplement added');
+    });
+    
+    // Add exercise button
+    var addExerciseBtn=document.getElementById('add-exercise-btn');
+    if(addExerciseBtn)addExerciseBtn.addEventListener('click',function(){
+      if(!_exerciseData)_exerciseData=[];
+      _exerciseData.push({name:'New Exercise',completed:false,duration:'30'});
+      saveExerciseData();
+      renderExercises();
+      showToast('✓ Exercise added');
+    });
+    
+    // Add shopping item button
+    var addItemBtn=document.getElementById('add-item-btn');
+    if(addItemBtn)addItemBtn.addEventListener('click',function(){
+      if(!_shoppingData)_shoppingData=[];
+      _shoppingData.push({item:'New Item',checked:false});
+      saveShoppingData();
+      renderShoppingItems();
+      showToast('✓ Item added to shopping list');
+    });
+  },100);
+}
+
+// DECLARATIONS DATA
+var _declarationsData=[];
+function loadDeclarations(){
+  var saved=localStorage.getItem('zola_declarations');
+  if(saved){
+    try{
+      _declarationsData=JSON.parse(saved);
+    }catch(e){
+      _declarationsData=[];
+    }
+  }
+  renderDeclarations();
+}
+
+function saveDeclarations(){
+  localStorage.setItem('zola_declarations',JSON.stringify(_declarationsData));
+}
+
+function saveDeclaration(){
+  var input=document.getElementById('declaration-input');
+  var text=input.value.trim();
+  
+  if(!text){
+    showToast('Please write a declaration');
+    return;
+  }
+  
+  if(text.length>500){
+    showToast('Declaration is too long (max 500 characters)');
+    return;
+  }
+  
+  var today=new Date();
+  var dateStr=(today.getMonth()+1).toString().padStart(2,'0')+'/'+today.getDate().toString().padStart(2,'0')+'/'+today.getFullYear();
+  
+  _declarationsData.unshift({
+    text:text,
+    date:dateStr,
+    timestamp:today.getTime()
+  });
+  
+  saveDeclarations();
+  input.value='';
+  document.getElementById('declaration-char-count').textContent='0';
+  renderDeclarations();
+  showToast('✦ Declaration saved!');
+}
+
+function updateDeclarationCount(){
+  var input=document.getElementById('declaration-input');
+  var count=input.value.length;
+  document.getElementById('declaration-char-count').textContent=Math.min(count,500);
+  
+  if(count>500){
+    input.value=input.value.substring(0,500);
+    document.getElementById('declaration-char-count').textContent='500';
+  }
+}
+
+function renderDeclarations(){
+  var container=document.getElementById('sp-declarations-list');
+  if(!container)return;
+  
+  if(_declarationsData.length===0){
+    container.innerHTML='<div style="text-align:center;padding:20px;color:rgba(200,190,255,0.38);font-size:12px;margin-top:10px;">Your declarations will appear here</div>';
+    return;
+  }
+  
+  var html='';
+  for(var i=0;i<_declarationsData.length;i++){
+    var decl=_declarationsData[i];
+    html+='<div class="sp-declaration-entry"><div class="sp-decl-avatar">✨</div><div class="sp-decl-content"><div class="sp-decl-date">'+decl.date+'</div><div class="sp-decl-text">'+escapeHtml(decl.text)+'</div></div><div class="sp-decl-del" onclick="deleteDeclaration('+i+')" title="Delete">×</div></div>';
+  }
+  
+  container.innerHTML=html;
+}
+
+function deleteDeclaration(index){
+  if(confirm('Delete this declaration?')){
+    _declarationsData.splice(index,1);
+    saveDeclarations();
+    renderDeclarations();
+    showToast('✓ Declaration deleted');
+  }
+}
+
+function escapeHtml(text){
+  var div=document.createElement('div');
+  div.textContent=text;
+  return div.innerHTML;
+}
+
+// Load declarations on startup
+setTimeout(function(){
+  loadDeclarations();
+},200);
+
+</script>
+</body>
+</html>
+
