@@ -1304,19 +1304,20 @@ function closeCandle(e){if(!e||e.target===document.getElementById('candle-overla
 /* ═══ AUDIO ═══ */
 (function(){
   // GitHub repository configuration
-  var GITHUB_USER='YOUR_GITHUB_USERNAME';
+  var GITHUB_USER='CryptoTripxz';
   var GITHUB_REPO='zola-audio';
   var GITHUB_BRANCH='main';
-  var AUDIO_PATH='audio';
+  var AUDIO_PATH='';
   
   function getGitHubURL(filename){
-    return 'https://raw.githubusercontent.com/'+GITHUB_USER+'/'+GITHUB_REPO+'/'+GITHUB_BRANCH+'/'+AUDIO_PATH+'/'+filename;
+    var path = AUDIO_PATH ? AUDIO_PATH+'/' : '';
+    return 'https://raw.githubusercontent.com/'+GITHUB_USER+'/'+GITHUB_REPO+'/'+GITHUB_BRANCH+'/'+path+filename;
   }
   
-  var TRACKS=[
+    var TRACKS=[
     {title:'Josh 1:8 · 1 John 3:1 · Romans 8:1',duration:260,filename:'Josh_1_8_1John_3_1_Rom8_1.mp3'},
     {title:'Isaiah 41:10 - Fear Not',duration:180,filename:'Isaiah_41_10.mp3'},
-    {title:'Jeremiah 31:3 · Lamentations 3:22-23',duration:240,filename:'Jeremiah_31_3_Lamentations_3_22_-_23__1_.mp3'},
+    {title:'Jeremiah 31:3 · Lamentations 3:22-23',duration:240,filename:'Jeremiah_31_3_Lamentations_3_22_-_23 (1).mp3'},
     {title:'Psalm 91 - Protection',duration:320,filename:'Psalm_91.mp3'},
     {title:'Psalm 124 - Thanksgiving',duration:280,filename:'Psalm_124.mp3'}
   ];
